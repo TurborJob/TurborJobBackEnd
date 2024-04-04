@@ -1,0 +1,107 @@
+allprojects {
+	group 'com.turborjob'
+	version '1.0-SNAPSHOT'
+
+	apply plugin: 'java'
+	apply plugin: 'idea'
+
+	repositories {
+		mavenCentral()
+	}
+}
+
+buildscript {
+	ext {
+		springBootVersion = '3.1.2'
+		springManagementVersion = '1.1.2'
+		lombokVersion = '1.18.24'
+		openApiVersion = '1.7.0'
+
+	}
+	repositories {
+		mavenCentral()
+	}
+
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("io.spring.gradle:dependency-management-plugin:${springManagementVersion}")
+	}
+}
+
+subprojects {
+	apply plugin: 'io.spring.dependency-management'
+	apply plugin: 'org.springframework.boot'
+
+	sourceCompatibility = '17'
+	targetCompatibility = '17'
+
+	configurations {
+		developmentOnly
+		runtimeClasspath {
+			extendsFrom developmentOnly
+		}
+		compileOnly {
+			extendsFrom annotationProcessor
+		}
+		configureEach {
+			exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
+		}
+	}
+
+	test {
+		useJUnitPlatform()
+	}
+
+	def defaultEncoding = 'UTF-8'
+	tasks.withType(AbstractCompile).each { it.options.encoding = defaultEncoding }
+
+	javadoc {
+		options.encoding = defaultEncoding
+		options.addBooleanOption('Xdoclint:none', true)
+	}
+
+	compileJava.dependsOn(processResources)
+
+	springBoot {
+		buildInfo()
+	}
+
+	dependencies{
+
+		/////////////////////////////////////////////////////////////////////////////
+
+		annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+		compileOnly "org.springframework.boot:spring-boot-configuration-processor"
+		compileOnly "org.projectlombok:lombok:${lombokVersion}"
+
+		// SPRING DEPENDENCIES
+		implementation 'org.springframework.boot:spring-boot-starter-security'
+		implementation 'org.springframework.boot:spring-boot-starter-web'
+		implementation 'org.jetbrains:annotations:24.0.0'
+		implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+		implementation 'org.springframework.boot:spring-boot-starter-log4j2'
+		implementation 'io.jsonwebtoken:jjwt:0.9.1'
+		implementation 'javax.xml.bind:jaxb-api:2.3.1'
+		implementation 'org.json:json:20090211'
+		// Utilities
+//		compile group: 'com.google.guava', name: 'guava', version: "${guavaVersion}"
+//		compile group: 'org.apache.commons', name: 'commons-lang3', version: "${commonLang3Version}"
+
+		// TEST
+		testImplementation('org.springframework.boot:spring-boot-starter-test') {
+			exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+		}
+	}
+}
+
+//project(':admin') {
+//	dependencies {
+//		implementation project(':core')
+//	}
+//}
+
+//project(':chat') {
+//	dependencies {
+//		implementation project(':core')
+//	}
+//}

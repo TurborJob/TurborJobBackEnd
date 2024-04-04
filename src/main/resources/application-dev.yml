@@ -1,0 +1,32 @@
+# application-dev.yml
+server:
+  port : 8077
+  connection-timeout: 5s
+ecommerce:
+  # token
+  accessTokenDueTime:  3000
+  refreshTokenDueTime: 86400
+
+  # jdbc
+  jdbcDriverClassName: org.postgresql.Driver
+  jdbcUrl:  jdbc:postgresql://localhost:2345/ecommerce?createDatabaseIfNotExist=true
+  jdbcUser: turborvip
+  jdbcPass: 123456a
+
+  # hikari
+  hikariPoolName: DEVELOPER_CATALOG
+  hikariTimeout: 300000 # 5 minute
+  hikariAutoCommit: true
+  hikariMaxLifeTime: 1800000 # 30 minute
+  hikariConnectionTimeout: 50000
+  hikariMaxPoolSize: 50
+
+  # hibernate
+  hibernateDialect: org.hibernate.dialect.PostgresPlusDialect
+  hibernateShowSQL: false
+  hibernateFormatSQL: false
+  hbm2ddlAuto: update
+  hbm2ddlCreateNamespaces: true
+
+  # gmail
+  fromEmail: turborvip@gmail.com
