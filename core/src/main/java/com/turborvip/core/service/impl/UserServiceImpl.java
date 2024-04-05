@@ -23,6 +23,7 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -49,11 +50,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User registerUser(UserDTO userDTO) {
         try {
-            // Todo check username
-            if (userRepository.existsByUsername(userDTO.getUserName())) {
-                throw new VsException(String.format(DevMessageConstant.Common.EXITS_USERNAME, userDTO.getUserName()));
-            }
-
             // Todo check birthday
             SimpleDateFormat sdf = new SimpleDateFormat(CommonConstant.FORMAT_DATE_PATTERN);
             Date birthday = null;
@@ -93,9 +89,23 @@ public class UserServiceImpl implements UserService {
                 throw new VsException(DevMessageConstant.Common.PASSWORD_WRONG_FORMAT);
             }
 
+            // Todo check exist
+            User userExist = userRepository.findFirstByUsernameOrEmailOrPhone(userDTO.getUsername(),userDTO.getEmail(),userDTO.getPhone()).orElse(null);
+            if(userExist != null){
+                if (Objects.equals(userExist.getUsername(), userDTO.getUsername())){
+                    throw new VsException(String.format(DevMessageConstant.Common.EXITS_USERNAME));
+                }
+                if (Objects.equals(userExist.getPhone(), userDTO.getPhone())){
+                    throw new VsException(String.format(DevMessageConstant.Common.EXITS_PHONE));
+                }
+                if (Objects.equals(userExist.getEmail(), userDTO.getEmail())){
+                    throw new VsException(String.format(DevMessageConstant.Common.EXITS_EMAIL));
+                }
+            }
+
             // Todo create new user
             Role roleUser = roleRepository.findRoleByRoleName(EnumRole.ROLE_USER);
-            User user = new User(userDTO.getFullName(), userDTO.getUserName(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
+            User user = new User(userDTO.getFullName(), userDTO.getUsername(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
                     userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(),5,0, new HashSet<>());
             user = userRepository.save(user);
             user.getRoles().add(roleUser);

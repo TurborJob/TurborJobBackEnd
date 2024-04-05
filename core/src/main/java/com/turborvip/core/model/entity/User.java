@@ -56,7 +56,7 @@ public class User extends AbstractBase implements UserDetails {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String address;
 
-    @Column(name = "avatar")
+    @Column(name = "avatar", columnDefinition = "TEXT")
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String avatar;
 

@@ -51,7 +51,7 @@ public class FirebaseServiceImpl implements FirebaseService {
             throw new Exception("File is empty");
         }
 
-        if(file.getSize() > 100000){
+        if(file.getSize() > 1000000){
             throw new Exception("File must less than 10MB ");
         }
 
