@@ -192,7 +192,7 @@ public class JwtService {
 
             //create refresh token
             String jwtRefreshToken = this.generateRefreshToken(refreshTokenDB.getCreateBy(), roleList, DEVICE_ID, refreshToken);
-            return new AuthResponse(jwtToken, jwtRefreshToken);
+            return new AuthResponse(jwtToken, jwtRefreshToken, null);
 
         } catch (Exception exception) {
             throw new Exception(exception);

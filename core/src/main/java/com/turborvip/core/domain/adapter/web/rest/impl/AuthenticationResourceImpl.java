@@ -56,7 +56,8 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
         try {
             SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
             logoutHandler.logout(request, response, authentication);
-            return authService.removeToken(request, response);
+            authService.removeToken(request);
+            return VsResponseUtil.ok(LOGOUT);
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }

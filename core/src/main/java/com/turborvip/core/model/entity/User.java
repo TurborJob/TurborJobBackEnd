@@ -2,6 +2,7 @@ package com.turborvip.core.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.entity.base.AbstractBase;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
 import com.turborvip.core.constant.CommonConstant;
+
 import java.util.*;
 
 @Entity
@@ -21,7 +23,7 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Table(name = "users",schema = "account")
+@Table(name = "users", schema = "account")
 public class User extends AbstractBase implements UserDetails {
 
     @Column(name = "fullname")
@@ -68,12 +70,11 @@ public class User extends AbstractBase implements UserDetails {
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
     @JoinTable(
-            name = "user_role",schema = "account",
+            name = "user_role", schema = "account",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
     private Set<Role> roles = new HashSet<>();
-
 
 
     @Override
@@ -116,5 +117,9 @@ public class User extends AbstractBase implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
+    }
+
+    public Profile getProfile() {
+        return new Profile(this.fullName, this.email, this.birthday.toString(), this.gender, this.phone, this.address, this.avatar);
     }
 }
