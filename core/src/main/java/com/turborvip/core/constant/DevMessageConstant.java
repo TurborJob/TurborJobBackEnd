@@ -18,6 +18,7 @@ public class DevMessageConstant {
         public static final String EXPORT_FILE = "Progress export file success";
         public static final String REGISTER_FAILED = "Register failed : The error is : %s";
         public static final String REGISTER_SUCCESS = "Sent request register account success!";
+        public static final String CHANGE_PASSWORD_SUCCESS = "Change password success!";
         public static final String CONFIRM_SUCCESSFUL = "Confirm account successful!";
         public static final String TOKEN_EXPIRED = "This token is expired!";
         public static final String TOKEN_INVALID = "This token is not valid!";

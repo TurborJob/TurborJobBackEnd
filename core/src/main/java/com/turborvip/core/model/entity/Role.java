@@ -21,19 +21,23 @@ import java.util.Set;
 public class Role extends AbstractBase {
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role_name",unique = true)
-    private EnumRole roleName;
+    @Column(name = "code",unique = true)
+    private EnumRole code;
+
+    @Column(name = "name",unique = true)
+    private String name;
 
     @OneToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     @JsonInclude
     private Set<User> users = new HashSet<>();
 
-    public Role(Long id, EnumRole enumRole) {
+    public Role(Long id, EnumRole enumRole, String name) {
         this.id = id;
-        this.roleName = EnumRole.valueOf(enumRole.name());
+        this.code = EnumRole.valueOf(enumRole.name());
+        this.name = name;
     }
 
     public Role(EnumRole enumRole) {
-        this.roleName = EnumRole.valueOf(enumRole.name());
+        this.code = EnumRole.valueOf(enumRole.name());
     }
 }

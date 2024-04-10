@@ -5,6 +5,7 @@ import com.turborvip.core.domain.adapter.web.base.RestData;
 import com.turborvip.core.domain.adapter.web.base.VsResponseUtil;
 import com.turborvip.core.domain.adapter.web.rest.AuthenticationResource;
 import com.turborvip.core.domain.http.request.AuthRequest;
+import com.turborvip.core.domain.http.request.ChangePassRequest;
 import com.turborvip.core.domain.http.response.AuthResponse;
 import com.turborvip.core.domain.http.response.RegisterResponse;
 import com.turborvip.core.service.UserService;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.turborvip.core.constant.DevMessageConstant.Common.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -88,14 +90,24 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
             User user = userService.registerUser(userDTO);
             List<String> listRole = new ArrayList<>();
             for (Role role : user.getRoles())
-                listRole.add(String.valueOf(role.getRoleName()));
+                listRole.add(String.valueOf(role.getCode()));
             String token = jwtService.generateToken(user, listRole, DEVICE_ID);
             String refreshToken = jwtService.generateRefreshToken(user, listRole, DEVICE_ID, null);
-            Profile profile = new Profile(userDTO.getFullName(), user.getEmail(), userDTO.getBirthday(), userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar());
+            Profile profile = new Profile(user.getFullName(), user.getEmail(), userDTO.getBirthday(), user.getGender(), user.getPhone(), user.getAddress(), user.getAvatar(), user.getRating());
             RegisterResponse registerResponse = new RegisterResponse(token, refreshToken, profile);
             return VsResponseUtil.ok(REGISTER_SUCCESS, registerResponse);
         } catch (Exception exception) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, exception.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> changePass(ChangePassRequest changePassRequest) {
+        try{
+            authService.changePass(changePassRequest);
+            return VsResponseUtil.ok(CHANGE_PASSWORD_SUCCESS);
+        }catch (Exception e){
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 }

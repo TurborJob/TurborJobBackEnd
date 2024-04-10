@@ -18,4 +18,12 @@ public interface UserService {
     Role saveRole(Role role);
 
     void addToUser(String username, String role_name);
+
+    void ratedUser(Long fromUserId, Long toUserId, float value, String description );
+
+    int numberUserRateFollowUser(Long userId) throws Exception;
+
+    String getRoleNameByPhone(String phone) throws Exception;
+
+    void changePass(HttpServletRequest request, String newPass);
 }

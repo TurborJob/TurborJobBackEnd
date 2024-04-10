@@ -85,7 +85,7 @@ public class User extends AbstractBase implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        roles.stream().forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getRoleName().name())));
+        roles.stream().forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getCode().name())));
         return List.of(new SimpleGrantedAuthority(authorities.toString()));
     }
 
@@ -120,6 +120,6 @@ public class User extends AbstractBase implements UserDetails {
     }
 
     public Profile getProfile() {
-        return new Profile(this.fullName, this.email, this.birthday.toString(), this.gender, this.phone, this.address, this.avatar);
+        return new Profile(this.fullName, this.email, this.birthday.toString(), this.gender, this.phone, this.address, this.avatar, this.rating);
     }
 }

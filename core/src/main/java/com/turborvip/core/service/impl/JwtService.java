@@ -185,7 +185,7 @@ public class JwtService {
                     .orElseThrow(() -> new Exception("Don't have anything refresh token"));
             Set<Role> roles = refreshTokenDB.getCreateBy().getRoles();
             List<String> roleList = new ArrayList<>();
-            roles.forEach(role -> roleList.add(role.getRoleName().toString()));
+            roles.forEach(role -> roleList.add(role.getCode().toString()));
             // 3.
             // create token
             String jwtToken = this.generateToken(refreshTokenDB.getCreateBy(), roleList, DEVICE_ID);

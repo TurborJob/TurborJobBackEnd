@@ -1,6 +1,8 @@
 package com.turborvip.core.config.application;
 
+import com.turborvip.core.constant.EnumRole;
 import com.turborvip.core.domain.repositories.UserRepository;
+import com.turborvip.core.model.entity.Role;
 import com.turborvip.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -63,12 +65,12 @@ public class ApplicationConfig {
     @Bean
     CommandLineRunner run(UserService userService) {
         return args -> {
-            /*userService.saveRole(new Role(null, EnumRole.ROLE_USER));
-            userService.saveRole(new Role(null, EnumRole.ROLE_SUPER_ADMIN));
-            userService.saveRole(new Role(null, EnumRole.ROLE_ADMIN));
-            userService.saveRole(new Role(null, EnumRole.MANAGER));
+            /*userService.saveRole(new Role(null, EnumRole.ROLE_USER,"User"));
+            userService.saveRole(new Role(null, EnumRole.ROLE_SUPER_ADMIN,"Supper Admin"));
+            userService.saveRole(new Role(null, EnumRole.ROLE_ADMIN,"Admin"));
+            userService.saveRole(new Role(null, EnumRole.MANAGER, "Manager"));*/
             //SimpleDateFormat formatter = new SimpleDateFormat(CommonConstant.FORMAT_DATE_PATTERN);
-            Date now = new Date();
+            /*Date now = new Date();
 
             HttpServletRequest request = null;
             User superAdmin = new User("TurborvipSuperAdmin", "turborvipSuperAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null, new HashSet<>());

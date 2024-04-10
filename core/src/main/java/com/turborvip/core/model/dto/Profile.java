@@ -15,4 +15,5 @@ public class Profile {
     private String phone;
     private String address;
     private String avatar;
+    private float rating;
 }

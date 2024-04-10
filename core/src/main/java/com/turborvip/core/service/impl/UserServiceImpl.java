@@ -4,8 +4,11 @@ import com.turborvip.core.config.exception.VsException;
 import com.turborvip.core.constant.CommonConstant;
 import com.turborvip.core.constant.DevMessageConstant;
 import com.turborvip.core.constant.EnumRole;
+import com.turborvip.core.domain.repositories.RateHistoryRepository;
 import com.turborvip.core.domain.repositories.RoleRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
+import com.turborvip.core.model.entity.RateHistory;
+import com.turborvip.core.model.entity.RateHistoryKey;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.util.RegexValidator;
 import com.turborvip.core.model.dto.UserDTO;
@@ -21,10 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 @AllArgsConstructor
@@ -39,6 +39,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private final RateHistoryRepository rateHistoryRepository;
 
 
     @Override
@@ -90,23 +93,23 @@ public class UserServiceImpl implements UserService {
             }
 
             // Todo check exist
-            User userExist = userRepository.findFirstByUsernameOrEmailOrPhone(userDTO.getUsername(),userDTO.getEmail(),userDTO.getPhone()).orElse(null);
-            if(userExist != null){
-                if (Objects.equals(userExist.getUsername(), userDTO.getUsername())){
+            User userExist = userRepository.findFirstByUsernameOrEmailOrPhone(userDTO.getUsername(), userDTO.getEmail(), userDTO.getPhone()).orElse(null);
+            if (userExist != null) {
+                if (Objects.equals(userExist.getUsername(), userDTO.getUsername())) {
                     throw new VsException(String.format(DevMessageConstant.Common.EXITS_USERNAME));
                 }
-                if (Objects.equals(userExist.getPhone(), userDTO.getPhone())){
+                if (Objects.equals(userExist.getPhone(), userDTO.getPhone())) {
                     throw new VsException(String.format(DevMessageConstant.Common.EXITS_PHONE));
                 }
-                if (Objects.equals(userExist.getEmail(), userDTO.getEmail())){
+                if (Objects.equals(userExist.getEmail(), userDTO.getEmail())) {
                     throw new VsException(String.format(DevMessageConstant.Common.EXITS_EMAIL));
                 }
             }
 
             // Todo create new user
-            Role roleUser = roleRepository.findRoleByRoleName(EnumRole.ROLE_USER);
+            Role roleUser = roleRepository.findRoleByCode(EnumRole.ROLE_USER);
             User user = new User(userDTO.getFullName(), userDTO.getUsername(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
-                    userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(),5,0, new HashSet<>());
+                    userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(), 5, 0, new HashSet<>());
             user = userRepository.save(user);
             user.getRoles().add(roleUser);
 
@@ -131,8 +134,74 @@ public class UserServiceImpl implements UserService {
     public void addToUser(String username, String role_name) {
 
         User user = userRepository.findByUsername(username).get();
-        Role role = roleRepository.findRoleByRoleName(EnumRole.valueOf(role_name));
+        Role role = roleRepository.findRoleByCode(EnumRole.valueOf(role_name));
 
         user.getRoles().add(role);
+    }
+
+    @Override
+    public void ratedUser(Long fromUserId, Long toUserId, float value, String description) {
+        RateHistoryKey rateHistoryKey = new RateHistoryKey(fromUserId, toUserId);
+        User fromUser = userRepository.findById(fromUserId).orElse(null);
+        User toUser = userRepository.findById(toUserId).orElse(null);
+        if (fromUser != null && toUser != null) {
+            RateHistory rateHistory = new RateHistory(rateHistoryKey, fromUser, toUser, value, description);
+            rateHistoryRepository.save(rateHistory);
+        }
+
+        List<RateHistory> listRatedUser = rateHistoryRepository.findByToUser(toUser);
+        float ratePointUser = 0;
+        float averageRatePoint = 5;
+
+        if (!listRatedUser.isEmpty()) {
+            for (RateHistory rateHistory : listRatedUser) {
+                ratePointUser += rateHistory.getRatingPoint();
+            }
+            averageRatePoint = ratePointUser / listRatedUser.size();
+
+            if (toUser != null) {
+                toUser.setRating(averageRatePoint);
+                userRepository.save(toUser);
+            }
+
+        }
+
+    }
+
+    @Override
+    public int numberUserRateFollowUser(Long userId) throws Exception {
+        User toUser = userRepository.findById(userId).orElse(null);
+        if (toUser == null) {
+            throw new Exception("User not found");
+        }
+        return rateHistoryRepository.countByToUser(toUser);
+    }
+
+    @Override
+    public String getRoleNameByPhone(String phone) throws Exception {
+        User user = userRepository.findByPhone(phone).orElse(null);
+
+        if (user == null){
+            throw new Exception("User not found");
+        }
+
+        StringBuilder rolesName = new StringBuilder();
+
+        List<Role> roles = user.getRoles().stream().toList();
+
+        for (int i = 0; i < roles.size(); i++) {
+            if (i == roles.size() -1){
+                rolesName.append(roles.get(i).getName());
+            }else{
+                rolesName.append(roles.get(i).getName()).append(", ");
+            }
+        }
+
+        return rolesName.toString();
+    }
+
+    @Override
+    public void changePass(HttpServletRequest request, String newPass) {
+
     }
 }

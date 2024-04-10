@@ -1,8 +1,12 @@
 package com.turborvip.core.service.impl;
 
+import com.turborvip.core.config.exception.VsException;
+import com.turborvip.core.constant.CommonConstant;
+import com.turborvip.core.constant.DevMessageConstant;
 import com.turborvip.core.domain.adapter.web.base.RestData;
 import com.turborvip.core.domain.adapter.web.base.VsResponseUtil;
 import com.turborvip.core.domain.http.request.AuthRequest;
+import com.turborvip.core.domain.http.request.ChangePassRequest;
 import com.turborvip.core.domain.http.response.AuthResponse;
 import com.turborvip.core.domain.repositories.RoleCusRepo;
 import com.turborvip.core.domain.repositories.TokenRepository;
@@ -11,6 +15,7 @@ import com.turborvip.core.service.TokenService;
 import com.turborvip.core.model.entity.Role;
 import com.turborvip.core.model.entity.Token;
 import com.turborvip.core.model.entity.User;
+import com.turborvip.core.util.RegexValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +25,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -64,7 +70,7 @@ public class AuthService {
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
             assert roleDB != null;
             user.setRoles(roleDB);
-            roleDB.forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getRoleName().toString())));
+            roleDB.forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getCode().name())));
 
             String DEVICE_ID = request.getHeader(USER_AGENT);
             List<String> roles = authorities.stream().map(GrantedAuthority::getAuthority).toList();
@@ -72,6 +78,31 @@ public class AuthService {
             var jwtRefreshToken = jwtService.generateRefreshToken(user, roles, DEVICE_ID, null);
             AuthResponse authResponse = new AuthResponse(jwtToken,jwtRefreshToken, user.getProfile());
             return VsResponseUtil.ok(LOGIN_SUCCESS, authResponse);
+        } catch (Exception err) {
+            log.warn(err.getMessage());
+            throw err;
+        }
+    }
+
+    public void changePass(ChangePassRequest changePassRequest) throws Exception {
+        try {
+            AuthenticationManager authManager = (AuthenticationManager) authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(changePassRequest.getUsername(), changePassRequest.getPassword()));
+            System.out.println("authManager " + authManager);
+            User user = null;
+            if(changePassRequest.getUsername() !=  null) {
+                user = userRepository.findByUsername(changePassRequest.getUsername()).orElse(null);
+            }
+
+            if(user == null){
+                throw new Exception("User not found!");
+            }
+
+            RegexValidator checkPassword = new RegexValidator(CommonConstant.REGEX_PASSWORD);
+            if (!checkPassword.validate(changePassRequest.getNewPassword())) {
+                throw new VsException(DevMessageConstant.Common.PASSWORD_WRONG_FORMAT);
+            }
+            user.setPassword(new BCryptPasswordEncoder().encode(changePassRequest.getNewPassword()));
+            userRepository.save(user);
         } catch (Exception err) {
             log.warn(err.getMessage());
             throw err;
