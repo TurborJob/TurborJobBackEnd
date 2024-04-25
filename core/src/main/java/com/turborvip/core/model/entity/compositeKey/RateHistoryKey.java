@@ -1,4 +1,4 @@
-package com.turborvip.core.model.entity;
+package com.turborvip.core.model.entity.compositeKey;
 
 
 import jakarta.persistence.Column;

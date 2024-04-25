@@ -65,6 +65,8 @@ public class ApplicationConfig {
     @Bean
     CommandLineRunner run(UserService userService) {
         return args -> {
+            /*userService.saveRole(new Role((long) 5, EnumRole.BUSINESS, "Business"));*/
+
             /*userService.saveRole(new Role(null, EnumRole.ROLE_USER,"User"));
             userService.saveRole(new Role(null, EnumRole.ROLE_SUPER_ADMIN,"Supper Admin"));
             userService.saveRole(new Role(null, EnumRole.ROLE_ADMIN,"Admin"));

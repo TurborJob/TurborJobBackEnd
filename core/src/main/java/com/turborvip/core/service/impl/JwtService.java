@@ -2,6 +2,7 @@ package com.turborvip.core.service.impl;
 
 import com.turborvip.core.config.application.EcommerceProperties;
 import com.turborvip.core.domain.http.response.AuthResponse;
+import com.turborvip.core.model.entity.compositeKey.UserDeviceKey;
 import com.turborvip.core.service.DeviceService;
 import com.turborvip.core.service.TokenService;
 import com.turborvip.core.service.UserDeviceService;

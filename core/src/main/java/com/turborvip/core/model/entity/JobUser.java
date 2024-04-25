@@ -2,9 +2,9 @@ package com.turborvip.core.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turborvip.core.model.entity.base.AbstractBaseWithoutId;
-import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
+import com.turborvip.core.model.entity.compositeKey.JobUserKey;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
+        import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,23 +14,24 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "rate_history", schema = "history")
+@Table(name = "job_user", schema = "job")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RateHistory extends AbstractBaseWithoutId {
+public class JobUser extends AbstractBaseWithoutId {
     @EmbeddedId
-    RateHistoryKey id;
+    JobUserKey id;
 
     @ManyToOne
     @MapsId("userId")
-    @JoinColumn(name = "from_user_id")
-    private User fromUser;
+    @JoinColumn(name = "userId")
+    private User userId;
 
     @ManyToOne
-    @MapsId("userId")
-    @JoinColumn(name = "to_user_id")
-    private User toUser;
+    @MapsId("jobId")
+    @JoinColumn(name = "jobId")
+    private Job jobId;
 
-    float ratingPoint;
+    String status;
+    // pending, approve, reject.
 
     @Column(name = "description", columnDefinition = "TEXT")
     String description = null;

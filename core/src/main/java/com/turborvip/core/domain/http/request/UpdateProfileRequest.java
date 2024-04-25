@@ -1,13 +1,15 @@
-package com.turborvip.core.model.dto;
+package com.turborvip.core.domain.http.request;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@Data
+@Builder
 @AllArgsConstructor
-@Getter
-@Setter
-public class Profile {
+@NoArgsConstructor
+public class UpdateProfileRequest {
     private String fullName;
     private String email;
     private String birthday;
@@ -15,6 +17,4 @@ public class Profile {
     private String phone;
     private String address;
     private String avatar;
-    private float rating;
-    private long countRate;
 }

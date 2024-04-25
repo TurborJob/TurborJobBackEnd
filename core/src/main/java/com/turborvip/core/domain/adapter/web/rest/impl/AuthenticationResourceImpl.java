@@ -93,7 +93,7 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
                 listRole.add(String.valueOf(role.getCode()));
             String token = jwtService.generateToken(user, listRole, DEVICE_ID);
             String refreshToken = jwtService.generateRefreshToken(user, listRole, DEVICE_ID, null);
-            Profile profile = new Profile(user.getFullName(), user.getEmail(), userDTO.getBirthday(), user.getGender(), user.getPhone(), user.getAddress(), user.getAvatar(), user.getRating());
+            Profile profile = new Profile(user.getFullName(), user.getEmail(), userDTO.getBirthday(), user.getGender(), user.getPhone(), user.getAddress(), user.getAvatar(), user.getRating(), user.getCountRate());
             RegisterResponse registerResponse = new RegisterResponse(token, refreshToken, profile);
             return VsResponseUtil.ok(REGISTER_SUCCESS, registerResponse);
         } catch (Exception exception) {
@@ -102,9 +102,9 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
     }
 
     @Override
-    public ResponseEntity<?> changePass(ChangePassRequest changePassRequest) {
+    public ResponseEntity<?> changePass(ChangePassRequest changePassRequest, HttpServletRequest request) {
         try{
-            authService.changePass(changePassRequest);
+            authService.changePass(changePassRequest, request);
             return VsResponseUtil.ok(CHANGE_PASSWORD_SUCCESS);
         }catch (Exception e){
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());

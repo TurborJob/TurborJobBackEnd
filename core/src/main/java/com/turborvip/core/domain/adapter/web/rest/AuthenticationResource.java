@@ -22,7 +22,7 @@ public interface AuthenticationResource {
     @PostMapping("/logout")
     ResponseEntity<RestData<?>> logout(Authentication authentication, HttpServletRequest request, HttpServletResponse response) throws IOException;
 
-    @PostMapping("/auth/test")
+    @PostMapping("/user/test")
     ResponseEntity<String> testAuth();
 
     @PostMapping("/auth/refresh-token")
@@ -32,5 +32,5 @@ public interface AuthenticationResource {
     ResponseEntity<RestData<?>> registerUser(@RequestBody UserDTO userDTO,HttpServletRequest request);
 
     @PostMapping("auth/change-pass")
-    ResponseEntity<?> changePass(@RequestBody ChangePassRequest changePassRequest);
+    ResponseEntity<?> changePass(@RequestBody ChangePassRequest changePassRequest, HttpServletRequest request);
 }

@@ -15,6 +15,8 @@ import javax.validation.constraints.Size;
 
 import com.turborvip.core.constant.CommonConstant;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Entity
@@ -64,6 +66,9 @@ public class User extends AbstractBase implements UserDetails {
 
     @Column(name = "rating")
     private float rating = 5;
+
+    @Column(name = "count-rate")
+    private long countRate = 0;
 
     @Column(name = "job_finnish_num")
     private long jobFinishNum = 0;
@@ -120,6 +125,7 @@ public class User extends AbstractBase implements UserDetails {
     }
 
     public Profile getProfile() {
-        return new Profile(this.fullName, this.email, this.birthday.toString(), this.gender, this.phone, this.address, this.avatar, this.rating);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        return new Profile(this.fullName, this.email, dateFormat.format(this.birthday), this.gender, this.phone, this.address, this.avatar, this.rating, this.countRate);
     }
 }

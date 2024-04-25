@@ -4,16 +4,17 @@ import com.turborvip.core.config.exception.VsException;
 import com.turborvip.core.constant.CommonConstant;
 import com.turborvip.core.constant.DevMessageConstant;
 import com.turborvip.core.constant.EnumRole;
+import com.turborvip.core.domain.http.request.UpdateProfileRequest;
 import com.turborvip.core.domain.repositories.RateHistoryRepository;
 import com.turborvip.core.domain.repositories.RoleRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
-import com.turborvip.core.model.entity.RateHistory;
-import com.turborvip.core.model.entity.RateHistoryKey;
+import com.turborvip.core.model.dto.Profile;
+import com.turborvip.core.model.entity.*;
+import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
+import com.turborvip.core.service.TokenService;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.util.RegexValidator;
 import com.turborvip.core.model.dto.UserDTO;
-import com.turborvip.core.model.entity.Role;
-import com.turborvip.core.model.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,9 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpHeaders.USER_AGENT;
 
 @Service
 @AllArgsConstructor
@@ -42,6 +46,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final RateHistoryRepository rateHistoryRepository;
+
+    @Autowired
+    private final TokenService tokenService;
+
+    @Autowired
+    private final AuthService authService;
 
 
     @Override
@@ -109,7 +119,7 @@ public class UserServiceImpl implements UserService {
             // Todo create new user
             Role roleUser = roleRepository.findRoleByCode(EnumRole.ROLE_USER);
             User user = new User(userDTO.getFullName(), userDTO.getUsername(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
-                    userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(), 5, 0, new HashSet<>());
+                    userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(), 5,0, 0, new HashSet<>());
             user = userRepository.save(user);
             user.getRoles().add(roleUser);
 
@@ -137,6 +147,8 @@ public class UserServiceImpl implements UserService {
         Role role = roleRepository.findRoleByCode(EnumRole.valueOf(role_name));
 
         user.getRoles().add(role);
+
+        userRepository.save(user);
     }
 
     @Override
@@ -161,6 +173,7 @@ public class UserServiceImpl implements UserService {
 
             if (toUser != null) {
                 toUser.setRating(averageRatePoint);
+                toUser.setCountRate(listRatedUser.size());
                 userRepository.save(toUser);
             }
 
@@ -178,30 +191,102 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String getRoleNameByPhone(String phone) throws Exception {
-        User user = userRepository.findByPhone(phone).orElse(null);
-
-        if (user == null){
-            throw new Exception("User not found");
-        }
-
-        StringBuilder rolesName = new StringBuilder();
+    public List<Role> getRoleName(HttpServletRequest request) throws Exception {
+        User user = authService.getUserByHeader(request);
 
         List<Role> roles = user.getRoles().stream().toList();
 
-        for (int i = 0; i < roles.size(); i++) {
-            if (i == roles.size() -1){
-                rolesName.append(roles.get(i).getName());
-            }else{
-                rolesName.append(roles.get(i).getName()).append(", ");
-            }
-        }
-
-        return rolesName.toString();
+        return roles;
     }
 
     @Override
-    public void changePass(HttpServletRequest request, String newPass) {
+    public Profile updateProfile(HttpServletRequest request, UpdateProfileRequest updateProfileRequest) throws Exception {
+        try {
+            String DEVICE_ID = request.getHeader(USER_AGENT);
+            String authorizationHeader = request.getHeader(AUTHORIZATION);
+            User user = null;
 
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                String token = authorizationHeader.substring("Bearer ".length());
+                Token tokenExist = tokenService.findFirstTokenByValue(token).orElse(null);
+                if (tokenExist != null) {
+                    List<Token> listToken = tokenService.findListTokenByUserAndDevice(tokenExist.getCreateBy().getId(), DEVICE_ID);
+                    if(listToken.isEmpty()){
+                        throw new Exception("Token not found");
+                    }
+                    UserDevice userDevice = listToken.get(0).getUserDevices();
+                    user = userDevice.getUser();
+                }else{
+                    throw new Exception("Token not found");
+                }
+            }
+
+            if(user == null){
+                throw new Exception("User not found!");
+            }
+
+            // Todo check birthday
+            SimpleDateFormat sdf = new SimpleDateFormat(CommonConstant.FORMAT_DATE_PATTERN);
+            Date birthday = null;
+            if (updateProfileRequest.getBirthday() != null) {
+                try {
+                    birthday = sdf.parse(updateProfileRequest.getBirthday());
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                    throw new VsException(String.format(e.getMessage()));
+                }
+            }
+
+            // Todo check phone number
+            if (updateProfileRequest.getPhone() != null) {
+                RegexValidator checkPhone = new RegexValidator(CommonConstant.REGEX_PHONE_NUMBER);
+                if (!checkPhone.validate(updateProfileRequest.getPhone())) {
+                    throw new VsException(DevMessageConstant.Common.PHONE_WRONG_FORMAT);
+                }
+            }
+
+            // Todo check email number
+            if (updateProfileRequest.getEmail() != null) {
+                RegexValidator checkEmail = new RegexValidator(CommonConstant.REGEX_EMAIL);
+                if (!checkEmail.validate(updateProfileRequest.getEmail())) {
+                    throw new VsException(DevMessageConstant.Common.EMAIL_WRONG_FORMAT);
+                }
+            }
+
+            // Todo check exist
+            User userExist = userRepository.findByEmailAndPhoneAndIdNot(updateProfileRequest.getEmail(), updateProfileRequest.getPhone(), user.getId()).orElse(null);
+            if (userExist != null) {
+                if (Objects.equals(userExist.getPhone(), updateProfileRequest.getPhone())) {
+                    throw new VsException(String.format(DevMessageConstant.Common.EXITS_PHONE));
+                }
+                if (Objects.equals(userExist.getEmail(), updateProfileRequest.getEmail())) {
+                    throw new VsException(String.format(DevMessageConstant.Common.EXITS_EMAIL));
+                }
+            }
+            user.setFullName(updateProfileRequest.getFullName());
+            user.setAddress(updateProfileRequest.getAddress());
+            user.setAvatar(updateProfileRequest.getAvatar());
+            user.setBirthday(birthday);
+            user.setEmail(updateProfileRequest.getEmail());
+            user.setGender(updateProfileRequest.getGender());
+            user.setPhone(updateProfileRequest.getPhone());
+            return userRepository.save(user).getProfile();
+        } catch (Exception err) {
+            log.warn(err.getMessage());
+            throw err;
+        }
     }
+
+    @Override
+    public void updateBusiness(HttpServletRequest request) throws Exception {
+        try{
+            User user = authService.getUserByHeader(request);
+            addToUser(user.getUsername(), String.valueOf(EnumRole.MANAGER));
+        } catch (Exception e){
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+
 }

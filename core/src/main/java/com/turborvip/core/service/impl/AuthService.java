@@ -11,6 +11,7 @@ import com.turborvip.core.domain.http.response.AuthResponse;
 import com.turborvip.core.domain.repositories.RoleCusRepo;
 import com.turborvip.core.domain.repositories.TokenRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
+import com.turborvip.core.model.entity.UserDevice;
 import com.turborvip.core.service.TokenService;
 import com.turborvip.core.model.entity.Role;
 import com.turborvip.core.model.entity.Token;
@@ -26,6 +27,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -52,6 +54,10 @@ public class AuthService {
 
     @Autowired
     private final TokenRepository tokenRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     public ResponseEntity<RestData<?>> authenticate(AuthRequest authRequest, HttpServletRequest request) throws Exception {
         try {
@@ -84,17 +90,35 @@ public class AuthService {
         }
     }
 
-    public void changePass(ChangePassRequest changePassRequest) throws Exception {
+    public void changePass(ChangePassRequest changePassRequest, HttpServletRequest request) throws Exception {
         try {
-            AuthenticationManager authManager = (AuthenticationManager) authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(changePassRequest.getUsername(), changePassRequest.getPassword()));
-            System.out.println("authManager " + authManager);
+            String DEVICE_ID = request.getHeader(USER_AGENT);
+            String authorizationHeader = request.getHeader(AUTHORIZATION);
             User user = null;
-            if(changePassRequest.getUsername() !=  null) {
-                user = userRepository.findByUsername(changePassRequest.getUsername()).orElse(null);
+
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+                String token = authorizationHeader.substring("Bearer ".length());
+                Token tokenExist = tokenService.findFirstTokenByValue(token).orElse(null);
+                if (tokenExist != null) {
+                    List<Token> listToken = tokenService.findListTokenByUserAndDevice(tokenExist.getCreateBy().getId(), DEVICE_ID);
+                    if(listToken.isEmpty()){
+                        throw new Exception("Token not found");
+                    }
+                    UserDevice userDevice = listToken.get(0).getUserDevices();
+                    user = userDevice.getUser();
+                }else{
+                    throw new Exception("Token not found");
+                }
             }
 
             if(user == null){
                 throw new Exception("User not found!");
+            }
+
+            /* Do compare password */
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if(!encoder.matches(changePassRequest.getPassword(), user.getPassword())){
+                throw new Exception("Old password is wrong");
             }
 
             RegexValidator checkPassword = new RegexValidator(CommonConstant.REGEX_PASSWORD);
@@ -122,5 +146,30 @@ public class AuthService {
         }
     }
 
+    public User getUserByHeader(HttpServletRequest request) throws Exception {
+        String DEVICE_ID = request.getHeader(USER_AGENT);
+        String authorizationHeader = request.getHeader(AUTHORIZATION);
+        User user = null;
+
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String token = authorizationHeader.substring("Bearer ".length());
+            Token tokenExist = tokenService.findFirstTokenByValue(token).orElse(null);
+            if (tokenExist != null) {
+                List<Token> listToken = tokenService.findListTokenByUserAndDevice(tokenExist.getCreateBy().getId(), DEVICE_ID);
+                if(listToken.isEmpty()){
+                    throw new Exception("Token not found");
+                }
+                UserDevice userDevice = listToken.get(0).getUserDevices();
+                user = userDevice.getUser();
+            }else{
+                throw new Exception("Token not found");
+            }
+        }
+
+        if(user == null){
+            throw new Exception("User not found!");
+        }
+        return user;
+    }
 
 }

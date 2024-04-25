@@ -1,10 +1,13 @@
 package com.turborvip.core.service;
 
+import com.turborvip.core.domain.http.request.UpdateProfileRequest;
+import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.dto.UserDTO;
 import com.turborvip.core.model.entity.Role;
 import com.turborvip.core.model.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -23,7 +26,9 @@ public interface UserService {
 
     int numberUserRateFollowUser(Long userId) throws Exception;
 
-    String getRoleNameByPhone(String phone) throws Exception;
+    List<Role> getRoleName(HttpServletRequest request) throws Exception;
 
-    void changePass(HttpServletRequest request, String newPass);
+    Profile updateProfile(HttpServletRequest request, UpdateProfileRequest updateProfileRequest) throws Exception;
+
+    void updateBusiness(HttpServletRequest request) throws Exception;
 }
