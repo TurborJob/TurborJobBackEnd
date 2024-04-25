@@ -19,7 +19,6 @@ public class FirebaseResourceImpl implements FirebaseResource {
     @Override
     public ResponseEntity<?> uploadFile(MultipartFile file) {
         try {
-            System.out.println("aa" + file);
             FileResponse result = new FileResponse(firebaseService.uploadFirebase(file, "images"));
             return VsResponseUtil.ok("File uploaded successfully!", result);
         } catch (IOException e) {

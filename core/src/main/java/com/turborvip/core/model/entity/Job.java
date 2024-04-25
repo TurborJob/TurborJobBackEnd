@@ -26,9 +26,6 @@ public class Job extends AbstractBase {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "thumbnail")
-    private String thumbnail;
-
     @Column(name = "address")
     private String address;
 

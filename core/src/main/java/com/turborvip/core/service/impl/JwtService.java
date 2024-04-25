@@ -184,7 +184,10 @@ public class JwtService {
             // 2.
             Token refreshTokenDB = tokenService.findTokenByValueAndNameAndType(refreshToken, "Refresh", "Bear")
                     .orElseThrow(() -> new Exception("Don't have anything refresh token"));
-            Set<Role> roles = refreshTokenDB.getCreateBy().getRoles();
+            Set<UserRole> userRole = refreshTokenDB.getCreateBy().getUserRole();
+            Set<Role> roles = new HashSet<>(Set.of());
+            userRole.forEach(i -> roles.add(i.getRole()));
+
             List<String> roleList = new ArrayList<>();
             roles.forEach(role -> roleList.add(role.getCode().toString()));
             // 3.

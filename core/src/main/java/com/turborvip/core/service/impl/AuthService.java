@@ -8,14 +8,11 @@ import com.turborvip.core.domain.adapter.web.base.VsResponseUtil;
 import com.turborvip.core.domain.http.request.AuthRequest;
 import com.turborvip.core.domain.http.request.ChangePassRequest;
 import com.turborvip.core.domain.http.response.AuthResponse;
-import com.turborvip.core.domain.repositories.RoleCusRepo;
 import com.turborvip.core.domain.repositories.TokenRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
-import com.turborvip.core.model.entity.UserDevice;
+import com.turborvip.core.domain.repositories.UserRoleRepository;
+import com.turborvip.core.model.entity.*;
 import com.turborvip.core.service.TokenService;
-import com.turborvip.core.model.entity.Role;
-import com.turborvip.core.model.entity.Token;
-import com.turborvip.core.model.entity.User;
 import com.turborvip.core.util.RegexValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +28,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import static com.turborvip.core.constant.DevMessageConstant.Common.LOGIN_SUCCESS;
@@ -42,12 +41,11 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @Slf4j
 public class AuthService {
     @Autowired
+    private UserRoleRepository userRoleRepository;
+    @Autowired
     private final UserRepository userRepository;
 
     private final AuthenticationManager authenticationManager;
-
-    @Autowired
-    private final RoleCusRepo roleCusRepo;
 
     private final JwtService jwtService;
     private final TokenService tokenService;
@@ -68,14 +66,27 @@ public class AuthService {
                 user = userRepository.findByUsername(authRequest.getUsername()).orElse(null);
             }
 
-            Set<Role> roleDB = null;
+            List<Role> roleDB = new ArrayList<>(List.of());
             if (user != null) {
-                roleDB = user.getRoles();
+                List<UserRole> userRole = userRoleRepository.findByUser(user);
+                LocalDate currentDate = LocalDate.now();
+                userRole.forEach(i -> {
+                    if(i.getDueDate() == null){
+                        roleDB.add(i.getRole());
+                    }else{
+                        LocalDate dueDate = i.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                        if (dueDate.isAfter(currentDate)){
+                            roleDB.add(i.getRole());
+                        }
+                    }
+                });
             }
 
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            assert roleDB != null;
-            user.setRoles(roleDB);
+            if (roleDB.isEmpty()){
+                throw new Exception("Role is null");
+            }
+
             roleDB.forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getCode().name())));
 
             String DEVICE_ID = request.getHeader(USER_AGENT);

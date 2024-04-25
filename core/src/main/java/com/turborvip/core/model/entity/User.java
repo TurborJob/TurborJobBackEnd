@@ -1,6 +1,7 @@
 package com.turborvip.core.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.entity.base.AbstractBase;
@@ -73,14 +74,18 @@ public class User extends AbstractBase implements UserDetails {
     @Column(name = "job_finnish_num")
     private long jobFinishNum = 0;
 
-    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
-    @JoinTable(
-            name = "user_role", schema = "account",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<Role> roles = new HashSet<>();
+//    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+//    @JoinTable(
+//            name = "user_role", schema = "account",
+//            joinColumns = @JoinColumn(name = "user_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id")
+//    )
+//    private Set<Role> roles = new HashSet<>();
 
+    @OneToMany(mappedBy = "user", cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
+    @JsonInclude
+    @JsonIgnore
+    private Set<UserRole> userRole;
 
     @Override
     public int hashCode() {
@@ -90,7 +95,7 @@ public class User extends AbstractBase implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        roles.stream().forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getCode().name())));
+        userRole.forEach(i -> authorities.add(new SimpleGrantedAuthority(i.getRole().getCode().name())));
         return List.of(new SimpleGrantedAuthority(authorities.toString()));
     }
 

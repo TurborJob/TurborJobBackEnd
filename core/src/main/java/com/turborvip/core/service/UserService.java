@@ -7,6 +7,8 @@ import com.turborvip.core.model.entity.Role;
 import com.turborvip.core.model.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +22,7 @@ public interface UserService {
 
     Role saveRole(Role role);
 
-    void addToUser(String username, String role_name);
+    void addToUser(String username, String role_name, Date dueDate);
 
     void ratedUser(Long fromUserId, Long toUserId, float value, String description );
 

@@ -8,6 +8,8 @@ import com.turborvip.core.domain.http.request.AuthRequest;
 import com.turborvip.core.domain.http.request.ChangePassRequest;
 import com.turborvip.core.domain.http.response.AuthResponse;
 import com.turborvip.core.domain.http.response.RegisterResponse;
+import com.turborvip.core.domain.repositories.UserRoleRepository;
+import com.turborvip.core.model.entity.UserRole;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.service.impl.AuthService;
 import com.turborvip.core.service.impl.JwtService;
@@ -38,6 +40,7 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @Component
 @Slf4j
 public class AuthenticationResourceImpl implements AuthenticationResource {
+    private final UserRoleRepository userRoleRepository;
 
     private final AuthService authService;
     private final JwtService jwtService;
@@ -89,7 +92,10 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
             String DEVICE_ID = request.getHeader(USER_AGENT);
             User user = userService.registerUser(userDTO);
             List<String> listRole = new ArrayList<>();
-            for (Role role : user.getRoles())
+            List<UserRole> userRoles = userRoleRepository.findByUser(user);
+            List<Role> roles = new ArrayList<>(List.of());
+            userRoles.forEach(i -> roles.add(i.getRole()));
+            for (Role role : roles)
                 listRole.add(String.valueOf(role.getCode()));
             String token = jwtService.generateToken(user, listRole, DEVICE_ID);
             String refreshToken = jwtService.generateRefreshToken(user, listRole, DEVICE_ID, null);

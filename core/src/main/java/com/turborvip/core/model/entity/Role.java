@@ -1,5 +1,6 @@
 package com.turborvip.core.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turborvip.core.constant.EnumRole;
 import com.turborvip.core.model.entity.base.AbstractBase;
@@ -27,9 +28,14 @@ public class Role extends AbstractBase {
     @Column(name = "name",unique = true)
     private String name;
 
-    @OneToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+//    @OneToMany(mappedBy = "roles", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
+//    @JsonInclude
+//    private Set<User> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "role", cascade = {CascadeType.DETACH, CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH}, orphanRemoval = true)
     @JsonInclude
-    private Set<User> users = new HashSet<>();
+    @JsonIgnore
+    private Set<UserRole> userRole = new HashSet<>();
 
     public Role(Long id, EnumRole enumRole, String name) {
         this.id = id;

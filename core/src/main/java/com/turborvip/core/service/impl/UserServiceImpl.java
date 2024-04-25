@@ -8,6 +8,7 @@ import com.turborvip.core.domain.http.request.UpdateProfileRequest;
 import com.turborvip.core.domain.repositories.RateHistoryRepository;
 import com.turborvip.core.domain.repositories.RoleRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
+import com.turborvip.core.domain.repositories.UserRoleRepository;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.entity.*;
 import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
@@ -24,7 +25,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -35,6 +40,8 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @Transactional
 @Slf4j
 public class UserServiceImpl implements UserService {
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     @Autowired
     private final RoleRepository roleRepository;
@@ -121,8 +128,10 @@ public class UserServiceImpl implements UserService {
             User user = new User(userDTO.getFullName(), userDTO.getUsername(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
                     userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(), 5,0, 0, new HashSet<>());
             user = userRepository.save(user);
-            user.getRoles().add(roleUser);
 
+            UserRole userRole = new UserRole(user, roleUser, null);
+
+            userRoleRepository.save(userRole);
             return user;
         } catch (Exception e) {
             log.error(e.getMessage());
@@ -141,14 +150,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addToUser(String username, String role_name) {
+    public void addToUser(String username, String role_name, Date dueDate) {
 
         User user = userRepository.findByUsername(username).get();
         Role role = roleRepository.findRoleByCode(EnumRole.valueOf(role_name));
-
-        user.getRoles().add(role);
-
-        userRepository.save(user);
+        UserRole userRole = new UserRole(user, role, dueDate);
+        userRoleRepository.save(userRole);
     }
 
     @Override
@@ -194,7 +201,19 @@ public class UserServiceImpl implements UserService {
     public List<Role> getRoleName(HttpServletRequest request) throws Exception {
         User user = authService.getUserByHeader(request);
 
-        List<Role> roles = user.getRoles().stream().toList();
+        List<UserRole> userRole = userRoleRepository.findByUser(user);
+        List<Role> roles = new ArrayList<>(List.of());
+        LocalDate currentDate = LocalDate.now();
+        userRole.forEach(i -> {
+            if(i.getDueDate() == null){
+                roles.add(i.getRole());
+            }else{
+                LocalDate dueDate = i.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+                if (dueDate.isAfter(currentDate)){
+                    roles.add(i.getRole());
+                }
+            }
+        });
 
         return roles;
     }
@@ -280,8 +299,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateBusiness(HttpServletRequest request) throws Exception {
         try{
+            Date currentDate = new Date();
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(currentDate);
+            calendar.add(Calendar.DAY_OF_MONTH, 30);
+            Date futureDate = calendar.getTime();
+
             User user = authService.getUserByHeader(request);
-            addToUser(user.getUsername(), String.valueOf(EnumRole.MANAGER));
+
+            addToUser(user.getUsername(), String.valueOf(EnumRole.MANAGER),futureDate);
         } catch (Exception e){
             log.error(e.getMessage());
             throw e;
