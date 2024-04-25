@@ -2,7 +2,9 @@ package com.turborvip.core.config.application;
 
 import com.turborvip.core.constant.EnumRole;
 import com.turborvip.core.domain.repositories.UserRepository;
+import com.turborvip.core.model.dto.Coordinates;
 import com.turborvip.core.model.entity.Role;
+import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +40,10 @@ public class ApplicationConfig {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final H3Service h3Service;
+
 
     @Bean
     public UserDetailsService userDetailsService(){
@@ -99,6 +105,9 @@ public class ApplicationConfig {
             userService.addToUser("turborvipAdmin", String.valueOf(EnumRole.ROLE_ADMIN));
             userService.addToUser("turborvipManager", String.valueOf(EnumRole.MANAGER));*/
             //test
+
+            double km = h3Service.calculateDistance(new Coordinates(21.053130955287447, 105.73932319679818),new Coordinates(21.042175467219348, 105.7863161542057));
+            System.out.println("xxx " + km);
         };
     }
 

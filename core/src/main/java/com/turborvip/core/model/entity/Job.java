@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,8 +30,8 @@ public class Job extends AbstractBase {
     @Column(name = "address")
     private String address;
 
-    @Column(name = "images")
-    private String[] images;
+    @Column(name = "images", columnDefinition = "TEXT[]")
+    private ArrayList<String> images;
 
     @Column(name = "description",columnDefinition = "TEXT")
     private String description;
@@ -49,8 +50,17 @@ public class Job extends AbstractBase {
     @Column(name = "due_date")
     private Timestamp dueDate;
 
-    @Column(name = "requirement", columnDefinition = "jsonb")
-    private ObjectNode requirement;
+    @Column(name = "lat")
+    private Double lat;
+
+    @Column(name = "lng")
+    private Double lng;
+
+    @Column(name = "is_vehicle")
+    private boolean isVehicle;
+
+    @Column(name = "gender")
+    private String gender;
 
     @Column(name = "viewer_num")
     private long viewer_num = 0;
@@ -59,4 +69,18 @@ public class Job extends AbstractBase {
     private String status = "inactive";
     // inactive, active, success, processing, done, fail.
 
+
+    public Job(String name, String address, ArrayList<String> images, String description, int quantityWorkerTotal, Timestamp startDate, Timestamp dueDate, ObjectNode ipAddress, boolean isVehicle, String gender, Double lat,Double lng) {
+        this.name = name;
+        this.address = address;
+        this.images = images;
+        this.description = description;
+        this.quantityWorkerTotal = quantityWorkerTotal;
+        this.startDate = startDate;
+        this.dueDate = dueDate;
+        this.lat = lat;
+        this.lng = lng;
+        this.isVehicle = isVehicle;
+        this.gender = gender;
+    }
 }

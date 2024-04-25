@@ -33,6 +33,9 @@ dependencies {
 
     // Cloud
     implementation 'com.google.firebase:firebase-admin:9.2.0'
+
+    // H3 Uber
+    implementation 'com.uber:h3:3.7.2'
 //
 //    // AWS
 //    implementation 'com.amazonaws:aws-java-sdk-ses:1.11.247'
