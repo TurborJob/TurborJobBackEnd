@@ -48,18 +48,18 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobsResponse getJobsByUser(HttpServletRequest request, int page, int size) throws Exception {
         User user = authService.getUserByHeader(request);
-        Pageable pageable = PageRequest.of(page,size);
+        Pageable pageable = PageRequest.of(page, size);
         long total = jobRepository.countByCreateBy(user);
         List<JobResponse> jobs = jobRepository.findByCreateByOrderByCreateAtDesc(user, pageable);
-        return new JobsResponse(jobs,total);
+        return new JobsResponse(jobs, total);
     }
 
     @Override
     public JobResponse findNormalJob(HttpServletRequest request, long jobId) throws Exception {
         User user = authService.getUserByHeader(request);
 
-        JobResponse job = jobRepository.findByCreateByAndId(user,jobId).orElse(null);
-        if (job == null){
+        JobResponse job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
+        if (job == null) {
             throw new Exception("Don't have job!");
         }
         return job;
@@ -68,12 +68,12 @@ public class JobServiceImpl implements JobService {
     @Override
     public JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page, int size, double lng, double lat) throws Exception {
         User user = authService.getUserByHeader(request);
-        Pageable pageable = PageRequest.of(page,size);
-        long total = jobRepository.countByCreateBy(user);
+        Pageable pageable = PageRequest.of(page, size);
         List<String> genderQuery = new ArrayList<>();
         genderQuery.add("all");
         genderQuery.add(user.getGender());
-        List<JobResponse> jobs = jobRepository.findNearestJobsWithoutUser(user.getId(),genderQuery,"processing", pageable, lng, lat);
-        return new JobsResponse(jobs,total);
+        long total = jobRepository.countByCreateByNotAndStatusAndGenderIn(user,"processing", genderQuery);
+        List<Job> jobs = jobRepository.findNearestJobsWithoutUser(user, genderQuery, "processing", lng, lat, pageable);
+        return new JobsResponse(jobs, total);
     }
 }

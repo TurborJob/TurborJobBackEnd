@@ -1,6 +1,7 @@
 package com.turborvip.core.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turborvip.core.model.entity.base.AbstractBase;
 import jakarta.persistence.*;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+//@JsonIgnoreProperties({"coordinates"})
 @Table(name = "jobs",schema = "job")
 public class Job extends AbstractBase {
 

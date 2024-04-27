@@ -10,6 +10,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class JobsResponse {
-    List jobs;
+    List<?> jobs;
     long total;
 }
