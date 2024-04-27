@@ -1,20 +1,21 @@
 package com.turborvip.core.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.turborvip.core.model.entity.base.AbstractBase;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.geo.Point;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 
 import javax.validation.constraints.NotEmpty;
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -54,14 +55,9 @@ public class Job extends AbstractBase {
     @Column(name = "due_date")
     private Timestamp dueDate;
 
-    @Column(name = "lat")
-    private Double lat;
-
-    @Column(name = "lng")
-    private Double lng;
-
-//    @Column(name = "coordinates",columnDefinition = "Geometry(Point, 4326)")
-//    private Point coordinates;
+    @Column(name = "coordinates",columnDefinition = "Geometry(Point, 4326)")
+    @JsonIgnore
+    private Point coordinates;
 
     @Column(name = "is_vehicle")
     private boolean isVehicle;
@@ -70,14 +66,14 @@ public class Job extends AbstractBase {
     private String gender;
 
     @Column(name = "viewer_num")
-    private long viewer_num = 0;
+    private long viewerNum = 0;
 
     @Column(name = "status")
     private String status = "inactive";
     // inactive, processing, done, fail.
 
 
-    public Job(String name, String address, ArrayList<String> images, String description, int quantityWorkerTotal, Timestamp startDate, Timestamp dueDate, ObjectNode ipAddress, boolean isVehicle, String gender, Double lat,Double lng ,float salary) {
+    public Job(String name, String address, ArrayList<String> images, String description, int quantityWorkerTotal, Timestamp startDate, Timestamp dueDate, boolean isVehicle, String gender, Double lat,Double lng ,float salary) {
         this.name = name;
         this.address = address;
         this.images = images;
@@ -85,10 +81,11 @@ public class Job extends AbstractBase {
         this.quantityWorkerTotal = quantityWorkerTotal;
         this.startDate = startDate;
         this.dueDate = dueDate;
-        this.lat = lat;
-        this.lng = lng;
         this.isVehicle = isVehicle;
         this.gender = gender;
         this.salary = salary;
+
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        this.coordinates = geometryFactory.createPoint(new Coordinate(lat,lng));
     }
 }

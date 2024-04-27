@@ -1,5 +1,6 @@
 package com.turborvip.core.service.impl;
 
+import com.turborvip.core.domain.http.response.JobResponse;
 import com.turborvip.core.domain.http.response.JobsResponse;
 import com.turborvip.core.domain.repositories.JobRepository;
 import com.turborvip.core.domain.repositories.JobUserRepository;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -35,7 +37,7 @@ public class JobServiceImpl implements JobService {
         User user = authService.getUserByHeader(request);
 
         Job job = new Job(jobDTO.getName(), jobDTO.getAddress(), jobDTO.getImages(), jobDTO.getDescription(), jobDTO.getQuantityWorker(),
-                new Timestamp(jobDTO.getStartDate().getTime()), new Timestamp(jobDTO.getDueDate().getTime()), jobDTO.getIpAddress(), jobDTO.isVehicle(),
+                new Timestamp(jobDTO.getStartDate().getTime()), new Timestamp(jobDTO.getDueDate().getTime()), jobDTO.isVehicle(),
                 jobDTO.getGender(), jobDTO.getLat(), jobDTO.getLng(), jobDTO.getSalary());
         job.setCreateBy(user);
         job.setUpdateBy(user);
@@ -48,27 +50,30 @@ public class JobServiceImpl implements JobService {
         User user = authService.getUserByHeader(request);
         Pageable pageable = PageRequest.of(page,size);
         long total = jobRepository.countByCreateBy(user);
-        List<Job> jobs = jobRepository.findByCreateByOrderByCreateAtDesc(user, pageable);
+        List<JobResponse> jobs = jobRepository.findByCreateByOrderByCreateAtDesc(user, pageable);
         return new JobsResponse(jobs,total);
     }
 
     @Override
-    public void findNormalJob(HttpServletRequest request, long jobId) throws Exception {
+    public JobResponse findNormalJob(HttpServletRequest request, long jobId) throws Exception {
         User user = authService.getUserByHeader(request);
 
-        Job job = jobRepository.findByCreateByAndId(user,jobId).orElse(null);
+        JobResponse job = jobRepository.findByCreateByAndId(user,jobId).orElse(null);
         if (job == null){
             throw new Exception("Don't have job!");
         }
-        job.setStatus("processing");
-        jobRepository.save(job);
+        return job;
     }
 
     @Override
-    public JobsResponse getNormalJobInsideUser(HttpServletRequest request, Pageable pageable) throws Exception {
+    public JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page, int size, double lng, double lat) throws Exception {
         User user = authService.getUserByHeader(request);
-        List<Job> jobs = jobRepository.findByCreateByNot(user, pageable);
-        long total = jobRepository.countByCreateByNot(user);
-        return new JobsResponse(jobs, total);
+        Pageable pageable = PageRequest.of(page,size);
+        long total = jobRepository.countByCreateBy(user);
+        List<String> genderQuery = new ArrayList<>();
+        genderQuery.add("all");
+        genderQuery.add(user.getGender());
+        List<JobResponse> jobs = jobRepository.findNearestJobsWithoutUser(user.getId(),genderQuery,"processing", pageable, lng, lat);
+        return new JobsResponse(jobs,total);
     }
 }

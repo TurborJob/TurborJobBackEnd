@@ -59,16 +59,10 @@ public class JobResourceImpl implements JobResource {
         try{
             int page = (int) requestBody.get("page");
             int size = (int) requestBody.get("size");
-            String createAt = (String) requestBody.get("createAt");
+            double lng = (double) requestBody.get("long");
+            double lat = (double) requestBody.get("lat");
 
-            Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-
-            if(createAt != null){
-                sort = Sort.by(createAt, "createdAt");
-            }
-
-            Pageable pageable = PageRequest.of(page, size, sort);
-            return VsResponseUtil.ok("Get job successfully!",jobService.getNormalJobInsideUser(request,pageable));
+            return VsResponseUtil.ok("Get job successfully!",jobService.getNormalJobInsideUser(request, page, size, lat, lng));
         }catch (Exception e){
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }

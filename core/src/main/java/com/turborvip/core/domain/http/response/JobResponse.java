@@ -1,7 +1,6 @@
-package com.turborvip.core.model.dto;
+package com.turborvip.core.domain.http.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.turborvip.core.constant.CommonConstant;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,12 +12,14 @@ import java.util.Date;
 @AllArgsConstructor
 @Getter
 @Setter
-public class JobDTO {
+public class JobResponse {
+    long id;
     String name;
     String address;
     ArrayList<String> images;
     String description;
-    int quantityWorker;
+    int quantityWorkerTotal;
+    int quantityWorkerCurrent;
 
     @JsonFormat(pattern = CommonConstant.FORMAT_DATE_PATTERN)
     Date startDate;
@@ -28,9 +29,9 @@ public class JobDTO {
 
     boolean isVehicle;
     String gender;
-
-    Double lat;
-    Double lng;
+    Long viewerNum;
 
     Float salary;
+
+    String status;
 }

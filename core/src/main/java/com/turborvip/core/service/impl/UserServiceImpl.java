@@ -308,7 +308,7 @@ public class UserServiceImpl implements UserService {
 
             User user = authService.getUserByHeader(request);
 
-            addToUser(user.getUsername(), String.valueOf(EnumRole.MANAGER),futureDate);
+            addToUser(user.getUsername(), String.valueOf(EnumRole.BUSINESS),futureDate);
         } catch (Exception e){
             log.error(e.getMessage());
             throw e;

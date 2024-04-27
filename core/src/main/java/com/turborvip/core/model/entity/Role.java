@@ -37,8 +37,7 @@ public class Role extends AbstractBase {
     @JsonIgnore
     private Set<UserRole> userRole = new HashSet<>();
 
-    public Role(Long id, EnumRole enumRole, String name) {
-        this.id = id;
+    public Role(EnumRole enumRole, String name) {
         this.code = EnumRole.valueOf(enumRole.name());
         this.name = name;
     }

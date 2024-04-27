@@ -1,0 +1,20 @@
+version: '3'
+
+services:
+  postgis:
+    image: postgis/postgis
+    container_name: postgis
+    restart: unless-stopped
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_DB: turborjob
+      POSTGRES_USER: turborvip
+      POSTGRES_PASSWORD: 123456a
+    networks:
+      - turborjob_net
+    volumes:
+      - ./data/postgis:/var/lib/postgresql/data
+
+networks:
+  turborjob_net:

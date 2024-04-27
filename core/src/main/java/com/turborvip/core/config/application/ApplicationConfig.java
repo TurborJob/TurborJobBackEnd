@@ -1,11 +1,14 @@
 package com.turborvip.core.config.application;
 
+import com.turborvip.core.constant.CommonConstant;
 import com.turborvip.core.constant.EnumRole;
 import com.turborvip.core.domain.repositories.UserRepository;
 import com.turborvip.core.model.dto.Coordinates;
 import com.turborvip.core.model.entity.Role;
+import com.turborvip.core.model.entity.User;
 import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +32,8 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Configuration
 @EnableScheduling
@@ -71,20 +73,19 @@ public class ApplicationConfig {
     @Bean
     CommandLineRunner run(UserService userService) {
         return args -> {
-            /*userService.saveRole(new Role((long) 5, EnumRole.BUSINESS, "Business"));*/
-
-            /*userService.saveRole(new Role(null, EnumRole.ROLE_USER,"User"));
-            userService.saveRole(new Role(null, EnumRole.ROLE_SUPER_ADMIN,"Supper Admin"));
-            userService.saveRole(new Role(null, EnumRole.ROLE_ADMIN,"Admin"));
-            userService.saveRole(new Role(null, EnumRole.MANAGER, "Manager"));*/
-            //SimpleDateFormat formatter = new SimpleDateFormat(CommonConstant.FORMAT_DATE_PATTERN);
-            /*Date now = new Date();
+            /*userService.saveRole(new Role(EnumRole.BUSINESS, "Business"));
+            userService.saveRole(new Role(EnumRole.ROLE_USER,"User"));
+            userService.saveRole(new Role(EnumRole.ROLE_SUPER_ADMIN,"Supper Admin"));
+            userService.saveRole(new Role(EnumRole.ROLE_ADMIN,"Admin"));
+            userService.saveRole(new Role(EnumRole.MANAGER, "Manager"));
+            SimpleDateFormat formatter = new SimpleDateFormat(CommonConstant.FORMAT_DATE_PATTERN);
+            Date now = new Date();
 
             HttpServletRequest request = null;
-            User superAdmin = new User("TurborvipSuperAdmin", "turborvipSuperAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null, new HashSet<>());
-            User user = new User("TurborvipUser", "turborvipUser", "123456a", "turborvip@gmail.com", now, null, null, null, null, new HashSet<>());
-            User admin = new User("TurborvipAdmin", "turborvipAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null, new HashSet<>());
-            User manager = new User("TurborvipManager", "turborvipManager", "123456a", "turborvip@gmail.com", now, null, null, null, null, new HashSet<>());
+            User superAdmin = new User("TurborvipSuperAdmin", "turborvipSuperAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User user = new User("TurborvipUser", "turborvipUser", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User admin = new User("TurborvipAdmin", "turborvipAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User manager = new User("TurborvipManager", "turborvipManager", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
 
             userService.create(superAdmin, request);
             User superAdminCreated = userService.findById(superAdmin.getId()).orElse(null);
@@ -100,10 +101,11 @@ public class ApplicationConfig {
             userService.create(admin, request);
             userService.create(manager, request);
 
-            userService.addToUser("turborvipSuperAdmin", String.valueOf(EnumRole.ROLE_SUPER_ADMIN));
-            userService.addToUser("turborvipUser", String.valueOf(EnumRole.ROLE_USER));
-            userService.addToUser("turborvipAdmin", String.valueOf(EnumRole.ROLE_ADMIN));
-            userService.addToUser("turborvipManager", String.valueOf(EnumRole.MANAGER));*/
+            userService.addToUser("turborvipSuperAdmin", String.valueOf(EnumRole.ROLE_SUPER_ADMIN), null);
+            userService.addToUser("turborvipUser", String.valueOf(EnumRole.ROLE_USER), null);
+            userService.addToUser("turborvipAdmin", String.valueOf(EnumRole.ROLE_ADMIN), null);
+            userService.addToUser("turborvipManager", String.valueOf(EnumRole.MANAGER), null);
+             */
             //test
 
             double km = h3Service.calculateDistance(new Coordinates(21.053130955287447, 105.73932319679818),new Coordinates(21.042175467219348, 105.7863161542057));
