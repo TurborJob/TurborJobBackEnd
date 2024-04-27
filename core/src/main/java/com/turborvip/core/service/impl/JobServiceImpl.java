@@ -8,6 +8,7 @@ import com.turborvip.core.model.dto.JobDTO;
 import com.turborvip.core.model.entity.Job;
 import com.turborvip.core.model.entity.JobUser;
 import com.turborvip.core.model.entity.User;
+import com.turborvip.core.model.entity.compositeKey.JobUserKey;
 import com.turborvip.core.service.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -55,14 +56,15 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobResponse findNormalJob(HttpServletRequest request, long jobId) throws Exception {
+    public void findNormalJob(HttpServletRequest request, long jobId) throws Exception {
         User user = authService.getUserByHeader(request);
 
-        JobResponse job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
+        Job job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
         if (job == null) {
             throw new Exception("Don't have job!");
         }
-        return job;
+        job.setStatus("processing");
+        jobRepository.save(job);
     }
 
     @Override
@@ -72,8 +74,36 @@ public class JobServiceImpl implements JobService {
         List<String> genderQuery = new ArrayList<>();
         genderQuery.add("all");
         genderQuery.add(user.getGender());
-        long total = jobRepository.countByCreateByNotAndStatusAndGenderIn(user,"processing", genderQuery);
-        List<Job> jobs = jobRepository.findNearestJobsWithoutUser(user, genderQuery, "processing", lng, lat, pageable);
+        List<JobUser> jobUsers = jobUserRepository.findByUserId(user);
+        List<Long> jobsIdApplied = new ArrayList<>();
+        jobUsers.forEach(i-> jobsIdApplied.add(i.getJobId().getId()));
+
+        long total = 0;
+        List<Job> jobs = new ArrayList<>();
+
+        if (jobsIdApplied.isEmpty()){
+            total = jobRepository.countByCreateByNotAndStatusAndGenderIn(user,"processing", genderQuery);
+            jobs = jobRepository.findNearestJobsWithoutUser(user, genderQuery, "processing", lng, lat, pageable);
+        }else{
+            total = jobRepository.countByCreateByNotAndStatusAndGenderInAndIdNotIn(user,"processing", genderQuery, jobsIdApplied);
+            jobs = jobRepository.findNearestJobsWithoutUserWithNotIn(jobsIdApplied, user, genderQuery, "processing", lng, lat, pageable);
+        }
+
         return new JobsResponse(jobs, total);
+    }
+
+    @Override
+    public void workerApplyJob(HttpServletRequest request, long jobId, String description) throws Exception {
+        User user = authService.getUserByHeader(request);
+        Job job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
+        if (job == null) {
+            throw new Exception("Don't have job!");
+        }
+        if (job.getQuantityWorkerCurrent() >= job.getQuantityWorkerTotal()){
+            throw new Exception("exceeded the number of workers");
+        }
+        jobUserRepository.save(new JobUser(new JobUserKey(job.getId(),user.getId()),user,job,"pending",description));
+        job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent()+1);
+        jobRepository.save(job);
     }
 }

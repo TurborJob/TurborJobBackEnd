@@ -14,7 +14,9 @@ public interface JobService {
 
     JobsResponse getJobsByUser(HttpServletRequest request, int page , int size) throws Exception;
 
-    JobResponse findNormalJob(HttpServletRequest request, long jobId) throws Exception;
+    void findNormalJob(HttpServletRequest request, long jobId) throws Exception;
 
     JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page , int size, double lng, double lat) throws Exception;
+
+    void workerApplyJob(HttpServletRequest request, long jobId, String description) throws Exception;
 }

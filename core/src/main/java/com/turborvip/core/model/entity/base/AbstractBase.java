@@ -27,7 +27,7 @@ public abstract class AbstractBase implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    protected long id;
+    protected Long id;
 
     @CreationTimestamp
     @Column(name = "create_at",  length = 50, updatable = false)

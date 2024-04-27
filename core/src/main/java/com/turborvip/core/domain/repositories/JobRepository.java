@@ -20,7 +20,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     long countByCreateBy(User createBy);
 
-    Optional<JobResponse> findByCreateByAndId(User createBy, long id);
+    Optional<Job> findByCreateByAndId(User createBy, long id);
 
     List<JobResponse> findByCreateByNot(User createBy, Pageable pageable);
 
@@ -36,4 +36,16 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     long countByCreateByNotAndStatusAndGenderIn(User createBy, String status, Collection<String> genders);
 
+
+    @Query(value = "select j from Job j " +
+            "where j.id not in :jobsApplied and j.createBy <> :createBy and j.gender in :genders and j.status = :status " +
+            "order by ST_Distance(j.coordinates, ST_SetSRID(ST_MakePoint(:longitude, :latitude),4326))",
+            countQuery = "select count(id) from Job j j.createBy <> :createBy and j.gender in :genders and j.status = :status"
+    )
+    List<Job> findNearestJobsWithoutUserWithNotIn(@Param("jobsApplied")Collection<Long> ids, @Param("createBy") User user, @Param("genders") Collection<String> genders,
+                                                  @Param("status") String status, @Param("longitude") double lng, @Param("latitude") double lat, Pageable pageable);
+
+    long countByCreateByNotAndStatusAndGenderInAndIdNotIn(User createBy, String status, Collection<String> genders, Collection<Long> ids);
+
+    List<Job> findByIdNotIn(Collection<Long> ids);
 }

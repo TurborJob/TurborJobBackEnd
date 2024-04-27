@@ -24,4 +24,7 @@ public interface JobResource {
 
     @PostMapping("/user-only/get-normal-job")
     ResponseEntity<RestData<?>> getNormalJobInsideUser(HttpServletRequest request , @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/user-only/apply-normal-job")
+    ResponseEntity<RestData<?>> applyNormalJob(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 }

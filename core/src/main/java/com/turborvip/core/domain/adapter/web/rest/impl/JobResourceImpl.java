@@ -67,4 +67,16 @@ public class JobResourceImpl implements JobResource {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
+    @Override
+    public ResponseEntity<RestData<?>> applyNormalJob(HttpServletRequest request, Map<String, Object> requestBody) {
+        try{
+            long jobId = (int) requestBody.get("jobId");
+            String description = (String) requestBody.get("description");
+            jobService.workerApplyJob(request,jobId,description);
+            return VsResponseUtil.ok("Apply job successfully!");
+        }catch (Exception e){
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 }
