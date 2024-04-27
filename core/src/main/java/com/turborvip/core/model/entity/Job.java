@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.geo.Point;
 
 import javax.validation.constraints.NotEmpty;
 import java.sql.Timestamp;
@@ -29,6 +30,9 @@ public class Job extends AbstractBase {
 
     @Column(name = "address")
     private String address;
+
+    @Column(name = "salary")
+    private float salary;
 
     @Column(name = "images", columnDefinition = "TEXT[]")
     private ArrayList<String> images;
@@ -56,6 +60,9 @@ public class Job extends AbstractBase {
     @Column(name = "lng")
     private Double lng;
 
+//    @Column(name = "coordinates",columnDefinition = "Geometry(Point, 4326)")
+//    private Point coordinates;
+
     @Column(name = "is_vehicle")
     private boolean isVehicle;
 
@@ -67,10 +74,10 @@ public class Job extends AbstractBase {
 
     @Column(name = "status")
     private String status = "inactive";
-    // inactive, active, success, processing, done, fail.
+    // inactive, processing, done, fail.
 
 
-    public Job(String name, String address, ArrayList<String> images, String description, int quantityWorkerTotal, Timestamp startDate, Timestamp dueDate, ObjectNode ipAddress, boolean isVehicle, String gender, Double lat,Double lng) {
+    public Job(String name, String address, ArrayList<String> images, String description, int quantityWorkerTotal, Timestamp startDate, Timestamp dueDate, ObjectNode ipAddress, boolean isVehicle, String gender, Double lat,Double lng ,float salary) {
         this.name = name;
         this.address = address;
         this.images = images;
@@ -82,5 +89,6 @@ public class Job extends AbstractBase {
         this.lng = lng;
         this.isVehicle = isVehicle;
         this.gender = gender;
+        this.salary = salary;
     }
 }

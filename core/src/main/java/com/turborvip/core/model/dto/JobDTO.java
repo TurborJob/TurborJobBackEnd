@@ -32,4 +32,6 @@ public class JobDTO {
 
     Double lat;
     Double lng;
+
+    Float salary;
 }
