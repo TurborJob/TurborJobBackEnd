@@ -10,6 +10,7 @@ import com.turborvip.core.model.entity.JobUser;
 import com.turborvip.core.model.entity.User;
 import com.turborvip.core.model.entity.compositeKey.JobUserKey;
 import com.turborvip.core.service.JobService;
+import com.turborvip.core.service.NotificationService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +31,12 @@ import java.util.List;
 public class JobServiceImpl implements JobService {
     private final JobUserRepository jobUserRepository;
     private final JobRepository jobRepository;
+
     @Autowired
     private final AuthService authService;
+
+    @Autowired
+    private final NotificationService notificationService;
 
     @Override
     public void createJob(HttpServletRequest request, JobDTO jobDTO) throws Exception {
@@ -95,7 +100,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public void workerApplyJob(HttpServletRequest request, long jobId, String description) throws Exception {
         User user = authService.getUserByHeader(request);
-        Job job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
+        Job job = jobRepository.findById(jobId).orElse(null);
         if (job == null) {
             throw new Exception("Don't have job!");
         }
@@ -103,7 +108,38 @@ public class JobServiceImpl implements JobService {
             throw new Exception("exceeded the number of workers");
         }
         jobUserRepository.save(new JobUser(new JobUserKey(job.getId(),user.getId()),user,job,"pending",description));
-        job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent()+1);
+        notificationService.createNotificationApplyReqForBusiness(user, job.getCreateBy(),description,"push");
         jobRepository.save(job);
+    }
+
+    @Override
+    public void approveRequestJob(HttpServletRequest request, long jobId, long userReqId, String description) throws Exception {
+        User user = authService.getUserByHeader(request);
+        JobUser jobUser = jobUserRepository.findByUserId_IdAndJobId_Id(userReqId,jobId).orElse(null);
+        if (jobUser == null) {
+            throw new Exception("Don't have request job!");
+        }
+        jobUser.setStatus("approve");
+
+        Job job = jobUser.getJobId();
+        job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent() + 1);
+        notificationService.createNotificationApproveReqForWorker(job,user,jobUser.getUserId(),description,"push");
+        if(job.getQuantityWorkerCurrent() == job.getQuantityWorkerTotal()){
+            job.setStatus("success");
+        }
+        jobUserRepository.save(jobUser);
+        jobRepository.save(job);
+    }
+
+    @Override
+    public void rejectRequestJob(HttpServletRequest request, long jobId, long userReqId, String description) throws Exception {
+        User user = authService.getUserByHeader(request);
+        JobUser jobUser = jobUserRepository.findByUserId_IdAndJobId_Id(userReqId,jobId).orElse(null);
+        if (jobUser == null) {
+            throw new Exception("Don't have request job!");
+        }
+        jobUser.setStatus("reject");
+        jobUserRepository.save(jobUser);
+        notificationService.createNotificationRejectReqForWorker(jobUser.getJobId(),user,jobUser.getUserId(),description,"push");
     }
 }

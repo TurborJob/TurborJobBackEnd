@@ -27,4 +27,10 @@ public interface JobResource {
 
     @PostMapping("/user-only/apply-normal-job")
     ResponseEntity<RestData<?>> applyNormalJob(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/business/approve-normal-job")
+    ResponseEntity<RestData<?>> approveNormalJob(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/business/reject-normal-job")
+    ResponseEntity<RestData<?>> rejectNormalJob(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 }

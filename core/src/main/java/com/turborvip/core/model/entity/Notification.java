@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.validation.constraints.NotEmpty;
-import java.sql.Timestamp;
-import java.util.ArrayList;
 
 @Entity
 @Getter

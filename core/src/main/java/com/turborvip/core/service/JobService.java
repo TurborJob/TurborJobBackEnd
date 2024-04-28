@@ -19,4 +19,8 @@ public interface JobService {
     JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page , int size, double lng, double lat) throws Exception;
 
     void workerApplyJob(HttpServletRequest request, long jobId, String description) throws Exception;
+
+    void approveRequestJob(HttpServletRequest request, long jobId, long userReqId, String description) throws Exception;
+
+    void rejectRequestJob(HttpServletRequest request, long jobId, long userReqId, String description) throws Exception;
 }

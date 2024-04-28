@@ -23,59 +23,85 @@ public class JobResourceImpl implements JobResource {
     private JobService jobService;
 
     @Override
-    public ResponseEntity<?> createJob(HttpServletRequest request , JobDTO jobDTO) {
-        try{
+    public ResponseEntity<?> createJob(HttpServletRequest request, JobDTO jobDTO) {
+        try {
             jobService.createJob(request, jobDTO);
             return VsResponseUtil.ok("Create job successfully!");
-        }catch (Exception e){
+        } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @Override
     public ResponseEntity<RestData<?>> getJobByUser(HttpServletRequest request, Map<String, Object> requestBody) {
-        try{
+        try {
             int page = (int) requestBody.get("page");
             int size = (int) requestBody.get("size");
-            return VsResponseUtil.ok("Get job successfully!",jobService.getJobsByUser(request,page,size));
-        }catch (Exception e){
+            return VsResponseUtil.ok("Get job successfully!", jobService.getJobsByUser(request, page, size));
+        } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @Override
     public ResponseEntity<RestData<?>> findNormalJob(HttpServletRequest request, Map<String, Object> requestBody) {
-        try{
+        try {
             long jobId = (int) requestBody.get("jobId");
-            jobService.findNormalJob(request,jobId);
+            jobService.findNormalJob(request, jobId);
             return VsResponseUtil.ok("Find successfully!");
-        }catch (Exception e){
+        } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @Override
     public ResponseEntity<RestData<?>> getNormalJobInsideUser(HttpServletRequest request, Map<String, Object> requestBody) {
-        try{
+        try {
             int page = (int) requestBody.get("page");
             int size = (int) requestBody.get("size");
             double lng = (double) requestBody.get("long");
             double lat = (double) requestBody.get("lat");
 
-            return VsResponseUtil.ok("Get job successfully!",jobService.getNormalJobInsideUser(request, page, size, lat, lng));
-        }catch (Exception e){
+            return VsResponseUtil.ok("Get job successfully!", jobService.getNormalJobInsideUser(request, page, size, lat, lng));
+        } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
 
     @Override
     public ResponseEntity<RestData<?>> applyNormalJob(HttpServletRequest request, Map<String, Object> requestBody) {
-        try{
+        try {
             long jobId = (int) requestBody.get("jobId");
             String description = (String) requestBody.get("description");
-            jobService.workerApplyJob(request,jobId,description);
+            jobService.workerApplyJob(request, jobId, description);
             return VsResponseUtil.ok("Apply job successfully!");
-        }catch (Exception e){
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<RestData<?>> approveNormalJob(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            long jobId = (int) requestBody.get("jobId");
+            long userReqId = (int) requestBody.get("userReqId");
+            String description = (String) requestBody.get("description");
+            jobService.approveRequestJob(request, jobId,userReqId, description);
+            return VsResponseUtil.ok("Approve request successfully!");
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<RestData<?>> rejectNormalJob(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            long jobId = (int) requestBody.get("jobId");
+            long userReqId = (int) requestBody.get("userReqId");
+            String description = (String) requestBody.get("description");
+            jobService.rejectRequestJob(request, jobId, userReqId,description);
+            return VsResponseUtil.ok("Reject request successfully!");
+        } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }

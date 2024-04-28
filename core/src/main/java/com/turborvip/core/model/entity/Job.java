@@ -72,7 +72,7 @@ public class Job extends AbstractBase {
 
     @Column(name = "status")
     private String status = "inactive";
-    // inactive, processing, done, fail.
+    // inactive, processing, success, done, fail.
 
 
     public Job(String name, String address, ArrayList<String> images, String description, int quantityWorkerTotal, Timestamp startDate, Timestamp dueDate, boolean isVehicle, String gender, Double lat,Double lng ,float salary) {
