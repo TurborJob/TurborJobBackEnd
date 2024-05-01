@@ -1,5 +1,6 @@
 package com.turborvip.core.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turborvip.core.model.entity.base.AbstractBaseWithoutId;
 import com.turborvip.core.model.entity.compositeKey.JobUserKey;
@@ -23,6 +24,7 @@ public class JobUser extends AbstractBaseWithoutId {
     @ManyToOne
     @MapsId("userId")
     @JoinColumn(name = "userId")
+    @JsonIgnore
     private User userId;
 
     @ManyToOne

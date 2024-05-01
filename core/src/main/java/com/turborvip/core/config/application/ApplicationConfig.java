@@ -108,8 +108,8 @@ public class ApplicationConfig {
              */
             //test
 
-            double km = h3Service.calculateDistance(new Coordinates(21.053130955287447, 105.73932319679818),new Coordinates(21.042175467219348, 105.7863161542057));
-            System.out.println("xxx " + km);
+            //double km = h3Service.calculateDistance(new Coordinates(21.053130955287447, 105.73932319679818),new Coordinates(21.042175467219348, 105.7863161542057));
+            //System.out.println("xxx " + km);
         };
     }
 

@@ -30,7 +30,10 @@ public class RateHistory extends AbstractBaseWithoutId {
     @JoinColumn(name = "to_user_id")
     private User toUser;
 
-    float ratingPoint;
+    private String jobName;
+
+    @Column(nullable = true)
+    Float ratingPoint;
 
     @Column(name = "description", columnDefinition = "TEXT")
     String description = null;

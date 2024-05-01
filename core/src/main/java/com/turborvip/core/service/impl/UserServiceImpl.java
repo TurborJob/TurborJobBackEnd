@@ -11,7 +11,6 @@ import com.turborvip.core.domain.repositories.UserRepository;
 import com.turborvip.core.domain.repositories.UserRoleRepository;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.entity.*;
-import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
 import com.turborvip.core.service.TokenService;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.util.RegexValidator;
@@ -25,9 +24,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
@@ -159,15 +156,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void ratedUser(Long fromUserId, Long toUserId, float value, String description) {
-        RateHistoryKey rateHistoryKey = new RateHistoryKey(fromUserId, toUserId);
-        User fromUser = userRepository.findById(fromUserId).orElse(null);
-        User toUser = userRepository.findById(toUserId).orElse(null);
-        if (fromUser != null && toUser != null) {
-            RateHistory rateHistory = new RateHistory(rateHistoryKey, fromUser, toUser, value, description);
-            rateHistoryRepository.save(rateHistory);
-        }
-
+    public void updateUserAfterRate(User toUser) {
         List<RateHistory> listRatedUser = rateHistoryRepository.findByToUser(toUser);
         float ratePointUser = 0;
         float averageRatePoint = 5;
@@ -183,9 +172,7 @@ public class UserServiceImpl implements UserService {
                 toUser.setCountRate(listRatedUser.size());
                 userRepository.save(toUser);
             }
-
         }
-
     }
 
     @Override

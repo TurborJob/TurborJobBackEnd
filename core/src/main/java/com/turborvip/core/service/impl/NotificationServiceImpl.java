@@ -20,7 +20,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void createNotificationApplyReqForBusiness(User sender, User receiver, String contentSender, String channel) throws Exception {
-        Notification notification = new Notification("Apply Job Request", contentSender, channel , false, receiver);
+        Notification notification = new Notification("Apply Job Request", contentSender, channel , false, receiver.getId());
         notification.setCreateBy(sender);
         notification.setUpdateBy(sender);
         notificationRepository.save(notification);
@@ -28,7 +28,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void createNotificationApproveReqForWorker(Job job, User sender, User receiver, String contentSender, String channel) throws Exception {
-        Notification notification = new Notification("Approve Job: "+ job.getName(), contentSender, channel , false, receiver);
+        Notification notification = new Notification("Approve Job: "+ job.getName(), contentSender, channel , false, receiver.getId());
         notification.setCreateBy(sender);
         notification.setUpdateBy(sender);
         notificationRepository.save(notification);
@@ -37,7 +37,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public void createNotificationRejectReqForWorker(Job job, User sender, User receiver, String contentSender, String channel) throws Exception {
-        Notification notification = new Notification("Reject Job: "+ job.getName(), contentSender, channel , false, receiver);
+        Notification notification = new Notification("Reject Job: "+ job.getName(), contentSender, channel , false, receiver.getId());
         notification.setCreateBy(sender);
         notification.setUpdateBy(sender);
         notificationRepository.save(notification);

@@ -47,5 +47,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     long countByCreateByNotAndStatusAndGenderInAndIdNotIn(User createBy, String status, Collection<String> genders, Collection<Long> ids);
 
-    List<Job> findByIdNotIn(Collection<Long> ids);
+    Optional<Job> findByIdAndCreateBy(Long id, User createBy);
+
 }

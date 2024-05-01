@@ -8,9 +8,6 @@ import com.turborvip.core.model.dto.JobDTO;
 import com.turborvip.core.service.JobService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -86,7 +83,7 @@ public class JobResourceImpl implements JobResource {
             long jobId = (int) requestBody.get("jobId");
             long userReqId = (int) requestBody.get("userReqId");
             String description = (String) requestBody.get("description");
-            jobService.approveRequestJob(request, jobId,userReqId, description);
+            jobService.approveRequestJob(request, jobId, userReqId, description);
             return VsResponseUtil.ok("Approve request successfully!");
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
@@ -99,10 +96,46 @@ public class JobResourceImpl implements JobResource {
             long jobId = (int) requestBody.get("jobId");
             long userReqId = (int) requestBody.get("userReqId");
             String description = (String) requestBody.get("description");
-            jobService.rejectRequestJob(request, jobId, userReqId,description);
+            jobService.rejectRequestJob(request, jobId, userReqId, description);
             return VsResponseUtil.ok("Reject request successfully!");
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
+    @Override
+    public ResponseEntity<RestData<?>> getJobRequestNormalJobInsideWorker(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            int page = (int) requestBody.get("page");
+            int size = (int) requestBody.get("size");
+            return VsResponseUtil.ok("Get request successfully!", jobService.getJobRequestApplyInsideWorker(request, page, size));
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<RestData<?>> getJobRequestNormalJobInsideBusiness(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            int page = (int) requestBody.get("page");
+            int size = (int) requestBody.get("size");
+            long jobId = (int) requestBody.get("jobId");
+            return VsResponseUtil.ok("Get request successfully!", jobService.getJobRequestInsideBusiness(request, page, size, jobId));
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<RestData<?>> updateDoneJobInBusinessSide(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            long jobId = (int) requestBody.get("jobId");
+            jobService.updateJobDoneBusinessSide(request, jobId);
+            return VsResponseUtil.ok("Update successfully!");
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+
 }

@@ -33,4 +33,13 @@ public interface JobResource {
 
     @PostMapping("/business/reject-normal-job")
     ResponseEntity<RestData<?>> rejectNormalJob(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/user-only/get-request-normal-job")
+    ResponseEntity<RestData<?>> getJobRequestNormalJobInsideWorker(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/business/get-request-normal-job")
+    ResponseEntity<RestData<?>> getJobRequestNormalJobInsideBusiness(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/business/update-job-done")
+    ResponseEntity<RestData<?>> updateDoneJobInBusinessSide(HttpServletRequest request,  @RequestBody Map<String, Object> requestBody);
 }

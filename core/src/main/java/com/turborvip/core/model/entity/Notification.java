@@ -34,7 +34,6 @@ public class Notification extends AbstractBase {
     @Column(name = "is_read")
     private Boolean isRead = false;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "send_to", referencedColumnName = "id")
-    private User toUser;
+    @Column(name = "send_to")
+    private Long toUser;
 }

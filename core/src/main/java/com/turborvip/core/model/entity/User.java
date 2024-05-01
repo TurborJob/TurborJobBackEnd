@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.turborvip.core.model.dto.Profile;
+import com.turborvip.core.model.dto.ProfileRequest;
 import com.turborvip.core.model.entity.base.AbstractBase;
 import jakarta.persistence.*;
 import lombok.*;
@@ -132,5 +133,10 @@ public class User extends AbstractBase implements UserDetails {
     public Profile getProfile() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
         return new Profile(this.fullName, this.email, dateFormat.format(this.birthday), this.gender, this.phone, this.address, this.avatar, this.rating, this.countRate);
+    }
+
+    public ProfileRequest getProfileAndNote(String note) {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        return new ProfileRequest(this.id, this.fullName, this.email, dateFormat.format(this.birthday), this.gender, this.phone, this.address, this.avatar, this.rating, this.countRate, note);
     }
 }
