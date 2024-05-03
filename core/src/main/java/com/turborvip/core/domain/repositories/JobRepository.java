@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -48,5 +49,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     long countByCreateByNotAndStatusAndGenderInAndIdNotIn(User createBy, String status, Collection<String> genders, Collection<Long> ids);
 
     Optional<Job> findByIdAndCreateBy(Long id, User createBy);
+
+    List<Job> findByStartDateGreaterThanAndStatusIn(Timestamp startDate, Collection<String> statuses);
+
 
 }

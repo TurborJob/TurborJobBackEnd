@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,5 +24,6 @@ public interface JobUserRepository extends JpaRepository<JobUser, Long> {
 
     List<JobUser> findByJobIdAndStatus(Job jobId, String status, Pageable pageable);
 
+    boolean existsByUserIdAndStatusAndJobId_StartDateBetweenOrJobId_DueDateBetween(User userId, String status, Timestamp startDateStart, Timestamp startDateEnd, Timestamp dueDateStart, Timestamp dueDateEnd);
 
 }

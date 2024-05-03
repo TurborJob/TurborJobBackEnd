@@ -38,4 +38,6 @@ public interface JobService {
     void updateJobDoneBusinessSide(HttpServletRequest request, long jobId) throws Exception;
 
     boolean checkJobIsSuccess(long jobId) throws Exception;
+
+    void updateJobExpireStartDate() throws Exception;
 }

@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -148,9 +149,19 @@ public class JobServiceImpl implements JobService {
         if (job.getQuantityWorkerCurrent() >= job.getQuantityWorkerTotal()) {
             throw new Exception("exceeded the number of workers");
         }
+
+        boolean checkTime = jobUserRepository.existsByUserIdAndStatusAndJobId_StartDateBetweenOrJobId_DueDateBetween(user,"approve"
+                ,job.getStartDate(),job.getDueDate(),job.getStartDate(),job.getDueDate());
+
+        if(checkTime){
+            throw new Exception("You do not satisfy the time requirement (due to other work during the corresponding time)");
+        }
+
         jobUserRepository.save(new JobUser(new JobUserKey(job.getId(), user.getId()), user, job, "pending", description));
         String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
         notificationService.createNotificationApplyReqForBusiness(user, job.getCreateBy(), note, "push");
+
+
         jobRepository.save(job);
     }
 
@@ -257,4 +268,14 @@ public class JobServiceImpl implements JobService {
         return job.getStatus().equals("success");
     }
 
+    @Override
+    public void updateJobExpireStartDate() throws Exception {
+        Date now = new Date();
+        ArrayList<String> statuses = new ArrayList<>();
+        // inactive, processing, success, done, fail.
+        statuses.add("inactive");
+        statuses.add("processing");
+        List<Job> jobs = jobRepository.findByStartDateGreaterThanAndStatusIn(new Timestamp(now.getTime()), statuses);
+        jobs.forEach(i->i.setStatus("fail"));
+    }
 }

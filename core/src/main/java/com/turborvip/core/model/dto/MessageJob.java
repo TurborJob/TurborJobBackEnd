@@ -1,5 +1,6 @@
 package com.turborvip.core.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.turborvip.core.domain.http.response.JobResponse;
 import com.turborvip.core.domain.http.response.JobsResponse;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class MessageJob {
 
     private Long sender;

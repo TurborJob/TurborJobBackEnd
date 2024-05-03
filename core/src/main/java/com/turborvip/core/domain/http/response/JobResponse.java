@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -21,11 +22,11 @@ public class JobResponse {
     int quantityWorkerTotal;
     int quantityWorkerCurrent;
 
-    @JsonFormat(pattern = CommonConstant.FORMAT_DATE_PATTERN)
-    Date startDate;
+    @JsonFormat(pattern = CommonConstant.FORMAT_DATE_PATTERN_DETAIL)
+    Timestamp startDate;
 
-    @JsonFormat(pattern = CommonConstant.FORMAT_DATE_PATTERN)
-    Date dueDate;
+    @JsonFormat(pattern = CommonConstant.FORMAT_DATE_PATTERN_DETAIL)
+    Timestamp dueDate;
 
     boolean isVehicle;
     String gender;
