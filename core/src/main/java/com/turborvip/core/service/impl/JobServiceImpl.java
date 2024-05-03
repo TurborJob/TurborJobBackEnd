@@ -80,8 +80,42 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
+    public void findNormalJobRunTime(User user, long jobId) throws Exception {
+        Job job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
+        if (job == null) {
+            throw new Exception("Don't have job!");
+        }
+        job.setStatus("processing");
+        jobRepository.save(job);
+    }
+
+    @Override
     public JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page, int size, double lng, double lat) throws Exception {
         User user = authService.getUserByHeader(request);
+        Pageable pageable = PageRequest.of(page, size);
+        List<String> genderQuery = new ArrayList<>();
+        genderQuery.add("all");
+        genderQuery.add(user.getGender());
+        List<JobUser> jobUsers = jobUserRepository.findByUserId(user);
+        List<Long> jobsIdApplied = new ArrayList<>();
+        jobUsers.forEach(i -> jobsIdApplied.add(i.getJobId().getId()));
+
+        long total = 0;
+        List<Job> jobs = new ArrayList<>();
+
+        if (jobsIdApplied.isEmpty()) {
+            total = jobRepository.countByCreateByNotAndStatusAndGenderIn(user, "processing", genderQuery);
+            jobs = jobRepository.findNearestJobsWithoutUser(user, genderQuery, "processing", lng, lat, pageable);
+        } else {
+            total = jobRepository.countByCreateByNotAndStatusAndGenderInAndIdNotIn(user, "processing", genderQuery, jobsIdApplied);
+            jobs = jobRepository.findNearestJobsWithoutUserWithNotIn(jobsIdApplied, user, genderQuery, "processing", lng, lat, pageable);
+        }
+
+        return new JobsResponse(jobs, total);
+    }
+
+    @Override
+    public JobsResponse getRunTimeJob(User user, int page, int size, double lng, double lat) throws Exception {
         Pageable pageable = PageRequest.of(page, size);
         List<String> genderQuery = new ArrayList<>();
         genderQuery.add("all");
@@ -115,7 +149,8 @@ public class JobServiceImpl implements JobService {
             throw new Exception("exceeded the number of workers");
         }
         jobUserRepository.save(new JobUser(new JobUserKey(job.getId(), user.getId()), user, job, "pending", description));
-        notificationService.createNotificationApplyReqForBusiness(user, job.getCreateBy(), description, "push");
+        String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
+        notificationService.createNotificationApplyReqForBusiness(user, job.getCreateBy(), note, "push");
         jobRepository.save(job);
     }
 
@@ -130,7 +165,8 @@ public class JobServiceImpl implements JobService {
 
         Job job = jobUser.getJobId();
         job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent() + 1);
-        notificationService.createNotificationApproveReqForWorker(job, user, jobUser.getUserId(), description, "push");
+        String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
+        notificationService.createNotificationApproveReqForWorker(job, user, jobUser.getUserId(), note, "push");
         if (job.getQuantityWorkerCurrent() == job.getQuantityWorkerTotal()) {
             job.setStatus("success");
         }
@@ -147,7 +183,8 @@ public class JobServiceImpl implements JobService {
         }
         jobUser.setStatus("reject");
         jobUserRepository.save(jobUser);
-        notificationService.createNotificationRejectReqForWorker(jobUser.getJobId(), user, jobUser.getUserId(), description, "push");
+        String note = "From "+ user.getFullName() + " (" + jobUser.getJobId().getName() + ") : " + description;
+        notificationService.createNotificationRejectReqForWorker(jobUser.getJobId(), user, jobUser.getUserId(), note, "push");
     }
 
     @Override
@@ -197,6 +234,7 @@ public class JobServiceImpl implements JobService {
             RateHistoryKey rateHistoryKeyWorkerBusiness = new RateHistoryKey(user.getId(), ownerJob.getId());
             RateHistory rateHistoryWorkerBusiness = new RateHistory(rateHistoryKeyWorkerBusiness, user, ownerJob, job.getName(), null, null);
             rateHistories.add(rateHistoryWorkerBusiness);
+            //notificationService.createNotificationRejectReqForWorker(job, user, ownerJob, "Please rating for me!", "push");
 
             /* Todo rate from Business to Worker*/
             RateHistoryKey rateHistoryKeyBusinessWorker = new RateHistoryKey(ownerJob.getId(), user.getId());

@@ -16,7 +16,6 @@ public interface UserResource {
     @PostMapping("/no-auth/create-user")
     ResponseEntity<?> create(@RequestBody User user, HttpServletRequest request);
 
-    //@RequestBody Map<String, Object> requestBody
     @PostMapping("user/get-role-name")
     ResponseEntity<?> getRoleName(HttpServletRequest request);
 

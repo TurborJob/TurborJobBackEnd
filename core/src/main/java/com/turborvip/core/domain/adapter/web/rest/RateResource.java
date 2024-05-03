@@ -16,5 +16,5 @@ public interface RateResource {
     ResponseEntity<RestData<?>> getRate(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 
     @PostMapping("/business-worker/rate")
-    ResponseEntity<RestData<?>> rateUser(HttpServletRequest request, Map<String, Object> requestBody);
+    ResponseEntity<RestData<?>> rateUser(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 }

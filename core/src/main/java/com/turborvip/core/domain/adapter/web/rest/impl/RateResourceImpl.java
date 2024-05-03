@@ -32,10 +32,10 @@ public class RateResourceImpl implements RateResource {
     @Override
     public ResponseEntity<RestData<?>> rateUser(HttpServletRequest request, Map<String, Object> requestBody) {
         try {
-            float valueRate = (float) requestBody.get("rateValue");
+            int valueRate = (int) requestBody.get("rateValue");
             String note = (String) requestBody.get("note");
-            long toUserId = (long) requestBody.get("toUser");
-            ratingHistoryService.rateUser(request, valueRate, note, toUserId);
+            int toUserId = (int) requestBody.get("toUser");
+            ratingHistoryService.rateUser(request, (float) valueRate, note, (long) toUserId);
             return VsResponseUtil.ok("Rate successfully!");
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());

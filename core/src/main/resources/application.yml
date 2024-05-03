@@ -36,3 +36,6 @@ spring:
     playground:
       enabled: true
       mapping: /playground
+  redis:
+    host: localhost
+    port: 6379

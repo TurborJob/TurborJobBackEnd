@@ -8,6 +8,10 @@ import com.turborvip.core.model.dto.ProfileRequest;
 import com.turborvip.core.model.entity.base.AbstractBase;
 import jakarta.persistence.*;
 import lombok.*;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -75,6 +79,10 @@ public class User extends AbstractBase implements UserDetails {
     @Column(name = "job_finnish_num")
     private long jobFinishNum = 0;
 
+    @Column(name = "coordinates", columnDefinition = "Geometry(Point, 4326)")
+    @JsonIgnore
+    private Point coordinates;
+
 //    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH})
 //    @JoinTable(
 //            name = "user_role", schema = "account",
@@ -132,11 +140,31 @@ public class User extends AbstractBase implements UserDetails {
 
     public Profile getProfile() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
-        return new Profile(this.fullName, this.email, dateFormat.format(this.birthday), this.gender, this.phone, this.address, this.avatar, this.rating, this.countRate);
+        return new Profile(this.id, this.fullName, this.email, dateFormat.format(this.birthday), this.gender, this.phone, this.address, this.avatar, this.rating, this.countRate);
     }
 
     public ProfileRequest getProfileAndNote(String note) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
         return new ProfileRequest(this.id, this.fullName, this.email, dateFormat.format(this.birthday), this.gender, this.phone, this.address, this.avatar, this.rating, this.countRate, note);
+    }
+
+    public User(String fullName, String username, String password, String email, Date birthday, String gender, String phone, String address, String avatar, float rating, long countRate,
+                long jobFinishNum, double lat, double lng, Set<UserRole> userRole) {
+        this.fullName = fullName;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.birthday = birthday;
+        this.gender = gender;
+        this.phone = phone;
+        this.address = address;
+        this.avatar = avatar;
+        this.rating = rating;
+        this.countRate = countRate;
+        this.jobFinishNum = jobFinishNum;
+        this.userRole = userRole;
+
+        GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+        this.coordinates = geometryFactory.createPoint(new Coordinate(lat, lng));
     }
 }

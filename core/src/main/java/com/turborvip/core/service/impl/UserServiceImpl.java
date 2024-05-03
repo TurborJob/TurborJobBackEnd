@@ -19,6 +19,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -123,7 +126,8 @@ public class UserServiceImpl implements UserService {
             // Todo create new user
             Role roleUser = roleRepository.findRoleByCode(EnumRole.ROLE_USER);
             User user = new User(userDTO.getFullName(), userDTO.getUsername(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
-                    userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(), 5,0, 0, new HashSet<>());
+                    userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(),
+                    5,0, 0,userDTO.getLat(),userDTO.getLng(), new HashSet<>());
             user = userRepository.save(user);
 
             UserRole userRole = new UserRole(user, roleUser, null);
@@ -276,6 +280,11 @@ public class UserServiceImpl implements UserService {
             user.setEmail(updateProfileRequest.getEmail());
             user.setGender(updateProfileRequest.getGender());
             user.setPhone(updateProfileRequest.getPhone());
+
+            if(updateProfileRequest.getLat() != null && updateProfileRequest.getLng() != null){
+                GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
+                user.setCoordinates(geometryFactory.createPoint(new Coordinate(updateProfileRequest.getLat(),updateProfileRequest.getLng())));
+            }
             return userRepository.save(user).getProfile();
         } catch (Exception err) {
             log.warn(err.getMessage());

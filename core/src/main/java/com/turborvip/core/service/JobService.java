@@ -6,6 +6,7 @@ import com.turborvip.core.domain.http.response.ProfilesResponse;
 import com.turborvip.core.model.dto.JobDTO;
 import com.turborvip.core.model.entity.Job;
 import com.turborvip.core.model.entity.JobUser;
+import com.turborvip.core.model.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -18,7 +19,11 @@ public interface JobService {
 
     void findNormalJob(HttpServletRequest request, long jobId) throws Exception;
 
+    void findNormalJobRunTime(User user, long jobId) throws Exception;
+
     JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page , int size, double lng, double lat) throws Exception;
+
+    JobsResponse getRunTimeJob(User user, int page, int size, double lng, double lat) throws Exception;
 
     void workerApplyJob(HttpServletRequest request, long jobId, String description) throws Exception;
 

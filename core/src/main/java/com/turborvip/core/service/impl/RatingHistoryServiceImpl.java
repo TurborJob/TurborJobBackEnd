@@ -26,7 +26,10 @@ import java.util.List;
 @Slf4j
 public class RatingHistoryServiceImpl implements RatingHistoryService {
 
+    @Autowired
     private RateHistoryRepository rateHistoryRepository;
+
+    @Autowired
     private UserRepository userRepository;
 
     @Autowired

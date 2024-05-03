@@ -38,6 +38,13 @@ dependencies {
 
     // H3 Uber
     implementation 'com.uber:h3:3.7.2'
+
+    // Socket
+    implementation group: 'org.springframework.boot', name: 'spring-boot-starter-websocket', version: '3.2.4'
+
+    // Redis
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis:3.1.1'
+    implementation 'redis.clients:jedis:4.4.3'
 //
 //    // AWS
 //    implementation 'com.amazonaws:aws-java-sdk-ses:1.11.247'

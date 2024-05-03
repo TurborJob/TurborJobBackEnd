@@ -28,7 +28,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
-    private final   JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
@@ -41,20 +41,24 @@ public class SecurityConfig {
                         .maxSessionsPreventsLogin(false))
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(new AntPathRequestMatcher("/**","OPTION")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/playground/**","GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/**", "OPTION")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/**", "GET")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/playground/**", "GET")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/graphql/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/ws/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/app/**")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/private-message/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/api/v1/all/**")).permitAll()
                         .requestMatchers(new AntPathRequestMatcher("/no-auth/**")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/login","POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/logout","POST")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/**")).hasAnyAuthority(EnumRole.ROLE_USER.toString(),EnumRole.ROLE_SUPER_ADMIN.toString(),EnumRole.ROLE_ADMIN.toString(),EnumRole.MANAGER.toString())
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/login", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/logout", "POST")).permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/**")).hasAnyAuthority(EnumRole.ROLE_USER.toString(), EnumRole.ROLE_SUPER_ADMIN.toString(), EnumRole.ROLE_ADMIN.toString(), EnumRole.MANAGER.toString())
                         .requestMatchers(new AntPathRequestMatcher("/api/v1/user-only/**")).hasAnyAuthority(EnumRole.ROLE_USER.toString())
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/user/**")).hasAnyAuthority(EnumRole.ROLE_USER.toString(),EnumRole.ROLE_SUPER_ADMIN.toString(),EnumRole.ROLE_ADMIN.toString(),EnumRole.MANAGER.toString())
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/admin/**")).hasAnyAuthority(EnumRole.ROLE_SUPER_ADMIN.toString(),EnumRole.ROLE_ADMIN.toString())
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/manager/**")).hasAnyAuthority(EnumRole.ROLE_SUPER_ADMIN.toString(),EnumRole.ROLE_ADMIN.toString(),EnumRole.MANAGER.toString())
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/user/**")).hasAnyAuthority(EnumRole.ROLE_USER.toString(), EnumRole.ROLE_SUPER_ADMIN.toString(), EnumRole.ROLE_ADMIN.toString(), EnumRole.MANAGER.toString())
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/admin/**")).hasAnyAuthority(EnumRole.ROLE_SUPER_ADMIN.toString(), EnumRole.ROLE_ADMIN.toString())
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/manager/**")).hasAnyAuthority(EnumRole.ROLE_SUPER_ADMIN.toString(), EnumRole.ROLE_ADMIN.toString(), EnumRole.MANAGER.toString())
                         .requestMatchers(new AntPathRequestMatcher("/api/v1/business/**")).hasAnyAuthority(EnumRole.BUSINESS.toString())
-                        .requestMatchers(new AntPathRequestMatcher("/api/v1/business-worker/**")).hasAnyAuthority(EnumRole.BUSINESS.toString(),EnumRole.ROLE_USER.toString())
+                        .requestMatchers(new AntPathRequestMatcher("/api/v1/business-worker/**")).hasAnyAuthority(EnumRole.BUSINESS.toString(), EnumRole.ROLE_USER.toString())
 
                         .anyRequest().authenticated())
 
@@ -66,9 +70,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*")); // Cho phép tất cả các domain
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("*")); // Cho phép tất cả các phương thức HTTP
         configuration.setAllowedHeaders(Arrays.asList("*")); // Cho phép tất cả các header
+        configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;

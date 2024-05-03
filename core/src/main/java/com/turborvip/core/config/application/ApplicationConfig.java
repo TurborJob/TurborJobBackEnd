@@ -1,20 +1,20 @@
 package com.turborvip.core.config.application;
 
-import com.turborvip.core.constant.CommonConstant;
-import com.turborvip.core.constant.EnumRole;
+import com.turborvip.core.domain.repositories.JobsRunTimeRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
-import com.turborvip.core.model.dto.Coordinates;
-import com.turborvip.core.model.entity.Role;
-import com.turborvip.core.model.entity.User;
+import com.turborvip.core.model.entity.JobsRunTime;
 import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -26,14 +26,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
 
 @Configuration
 @EnableScheduling
@@ -42,6 +36,9 @@ public class ApplicationConfig {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final JobsRunTimeRepository jobsRunTimeRepository;
 
     @Autowired
     private final H3Service h3Service;
@@ -110,6 +107,21 @@ public class ApplicationConfig {
 
             //double km = h3Service.calculateDistance(new Coordinates(21.053130955287447, 105.73932319679818),new Coordinates(21.042175467219348, 105.7863161542057));
             //System.out.println("xxx " + km);
+
+
+//            jobsRunTimeRepository.save(new JobsRunTime(2,"2" ));
+//            jobsRunTimeRepository.save(new JobsRunTime(1,"2" ));
+//            jobsRunTimeRepository.save(new JobsRunTime(3,"2" ));
+
+//            jobsRunTimeRepository.deleteById("1");
+//            jobsRunTimeRepository.deleteById("2");
+//            jobsRunTimeRepository.deleteById("4");
+
+
+//            JobsRunTime jobsRunTime = jobsRunTimeRepository.findById(1L).orElseThrow(null);
+//            System.out.println(jobsRunTimeRepository.findByRecipientId("2"));
+//            System.out.println(jobsRunTime.getRecipientId());
+
         };
     }
 
