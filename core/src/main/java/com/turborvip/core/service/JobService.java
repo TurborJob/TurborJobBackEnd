@@ -36,4 +36,6 @@ public interface JobService {
     ProfilesResponse getJobRequestInsideBusiness(HttpServletRequest request, int page, int size, long jobId) throws Exception;
 
     void updateJobDoneBusinessSide(HttpServletRequest request, long jobId) throws Exception;
+
+    boolean checkJobIsSuccess(long jobId) throws Exception;
 }

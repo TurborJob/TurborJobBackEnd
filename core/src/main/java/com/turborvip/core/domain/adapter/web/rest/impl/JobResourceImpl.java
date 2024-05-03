@@ -137,5 +137,13 @@ public class JobResourceImpl implements JobResource {
         }
     }
 
-
+    @Override
+    public ResponseEntity<RestData<?>> checkJobIsSuccess(Map<String, Object> requestBody) {
+        try {
+            long jobId = (int) requestBody.get("jobId");
+            return VsResponseUtil.ok("Check successfully!",jobService.checkJobIsSuccess(jobId));
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 }

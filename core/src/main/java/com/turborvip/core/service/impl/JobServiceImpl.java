@@ -161,9 +161,13 @@ public class JobServiceImpl implements JobService {
         if (jobUser == null) {
             throw new Exception("Don't have request job!");
         }
+        Job job = jobUser.getJobId();
+        if (job.getQuantityWorkerCurrent() >= job.getQuantityWorkerTotal()) {
+            throw new Exception("Job is success not approve request!");
+        }
+
         jobUser.setStatus("approve");
 
-        Job job = jobUser.getJobId();
         job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent() + 1);
         String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
         notificationService.createNotificationApproveReqForWorker(job, user, jobUser.getUserId(), note, "push");
@@ -242,6 +246,15 @@ public class JobServiceImpl implements JobService {
             rateHistories.add(rateHistoryBusinessWorker);
         }
         rateHistoryRepository.saveAll(rateHistories);
+    }
+
+    @Override
+    public boolean checkJobIsSuccess(long jobId) throws Exception {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        if(job == null){
+            throw new Exception("Job invalid!");
+        }
+        return job.getStatus().equals("success");
     }
 
 }

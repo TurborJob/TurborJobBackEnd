@@ -38,13 +38,9 @@ public class PrivateMessageController {
         messagingTemplate.convertAndSendToUser(recipientId, "/private-message", new Message(senderId, content));
     }
 
-    @MessageMapping("/private-message/get-job/{recipientId}")
-    public MessageJob getJobsRuntime(@DestinationVariable String recipientId, PrivateMessage message) throws Exception {
-        User user = userRepository.findById(message.getSender()).orElse(null);
-        if(user != null){
-            messagingTemplate.convertAndSendToUser(recipientId, "/topic/private-message/get-job",
-                    new MessageJob(message.getSender(), "Update jobs runtime",  jobService.getRunTimeJob(user,0, 10,message.getLng(),message.getLat())));
-        }
-        return null;
+    @MessageMapping("/private-message/send-request-apply-job/{jobId}")
+    public void getJobsRuntime(@DestinationVariable String jobId, PrivateMessage message) throws Exception {
+        messagingTemplate.convertAndSend("/topic/private-message/get-request-apply-job/" + jobId,
+                new Message(message.getSender(), "Update apply request runtime", true));
     }
 }

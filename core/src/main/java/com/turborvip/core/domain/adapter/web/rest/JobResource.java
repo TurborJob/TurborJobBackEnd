@@ -42,4 +42,7 @@ public interface JobResource {
 
     @PostMapping("/business/update-job-done")
     ResponseEntity<RestData<?>> updateDoneJobInBusinessSide(HttpServletRequest request,  @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("/business/check-job-success")
+    ResponseEntity<RestData<?>> checkJobIsSuccess(@RequestBody Map<String, Object> requestBody);
 }
