@@ -160,8 +160,6 @@ public class JobServiceImpl implements JobService {
         jobUserRepository.save(new JobUser(new JobUserKey(job.getId(), user.getId()), user, job, "pending", description));
         String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
         notificationService.createNotificationApplyReqForBusiness(user, job.getCreateBy(), note, "push");
-
-
         jobRepository.save(job);
     }
 
@@ -277,5 +275,14 @@ public class JobServiceImpl implements JobService {
         statuses.add("processing");
         List<Job> jobs = jobRepository.findByStartDateGreaterThanAndStatusIn(new Timestamp(now.getTime()), statuses);
         jobs.forEach(i->i.setStatus("fail"));
+    }
+
+    @Override
+    public long findUserIdByJobId(long jobId) throws Exception {
+        Job job = jobRepository.findById(jobId).orElse(null);
+        if (job == null){
+            throw new Exception("Job invalid");
+        }
+        return job.getCreateBy().getId();
     }
 }

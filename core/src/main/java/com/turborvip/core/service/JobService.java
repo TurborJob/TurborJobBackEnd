@@ -40,4 +40,6 @@ public interface JobService {
     boolean checkJobIsSuccess(long jobId) throws Exception;
 
     void updateJobExpireStartDate() throws Exception;
+
+    long findUserIdByJobId(long jobId) throws Exception;
 }

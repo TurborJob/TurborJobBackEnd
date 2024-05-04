@@ -6,11 +6,14 @@ import com.turborvip.core.model.dto.MessageJob;
 import com.turborvip.core.model.dto.PrivateMessage;
 import com.turborvip.core.model.entity.User;
 import com.turborvip.core.service.JobService;
+import io.lettuce.core.ScriptOutputType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
+
+import java.util.Objects;
 
 @Controller
 public class PrivateMessageController {
@@ -42,5 +45,19 @@ public class PrivateMessageController {
     public void getJobsRuntime(@DestinationVariable String jobId, PrivateMessage message) throws Exception {
         messagingTemplate.convertAndSend("/topic/private-message/get-request-apply-job/" + jobId,
                 new Message(message.getSender(), "Update apply request runtime", true));
+    }
+
+    @MessageMapping("/private-message/send-request-update-notify/{userId}")
+    public void getNotifyRuntime(@DestinationVariable String userId, PrivateMessage message) throws Exception {
+
+        System.out.println("userId :" +userId);
+        if(Objects.equals(userId, "null")){
+            long userIdDB = jobService.findUserIdByJobId(message.getJobId());
+            messagingTemplate.convertAndSend("/topic/private-message/get-request-update-notify/" + userIdDB,
+                    new Message(message.getSender(), "Update list notify runtime", true));
+        }else{
+            messagingTemplate.convertAndSend("/topic/private-message/get-request-update-notify/" + userId,
+                    new Message(message.getSender(), "Update list notify runtime", true));
+        }
     }
 }
