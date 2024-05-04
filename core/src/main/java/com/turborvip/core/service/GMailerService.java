@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public interface GMailerService {
 
-//    Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, GsonFactory jsonFactory) throws IOException;
-//
-//
-//    void sendEmail(String to, String subject, String message) throws MessagingException, IOException;
+    Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, GsonFactory jsonFactory) throws IOException;
+
+
+    void sendEmail(String to, String subject, String message) throws MessagingException, IOException;
 }

@@ -5,6 +5,7 @@ import com.turborvip.core.domain.repositories.UserRepository;
 import com.turborvip.core.model.entity.JobsRunTime;
 import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
+import com.turborvip.core.service.impl.GMailerServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -45,12 +46,12 @@ public class ApplicationConfig {
 
 
     @Bean
-    public UserDetailsService userDetailsService(){
-        return username -> userRepository.findByUsername(username).orElseThrow(()-> new UsernameNotFoundException("User not found"));
+    public UserDetailsService userDetailsService() {
+        return username -> userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
@@ -58,12 +59,12 @@ public class ApplicationConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
@@ -121,6 +122,11 @@ public class ApplicationConfig {
 //            JobsRunTime jobsRunTime = jobsRunTimeRepository.findById(1L).orElseThrow(null);
 //            System.out.println(jobsRunTimeRepository.findByRecipientId("2"));
 //            System.out.println(jobsRunTime.getRecipientId());
+
+//            new GMailerServiceImpl().sendEmail("dothanhdat11032002@gmail.com",
+//                    "Warning warning !!! Turborvip app",
+//                    "Another try attach your account you should change password now!");
+
 
         };
     }

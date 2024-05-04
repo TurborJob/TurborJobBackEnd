@@ -5,6 +5,7 @@ import com.turborvip.core.config.exception.ForbiddenException;
 import com.turborvip.core.domain.repositories.TokenRepository;
 import com.turborvip.core.service.GMailerService;
 import com.turborvip.core.service.TokenService;
+import com.turborvip.core.service.impl.GMailerServiceImpl;
 import com.turborvip.core.service.impl.JwtService;
 import com.turborvip.core.model.entity.Token;
 import io.jsonwebtoken.Claims;
@@ -56,7 +57,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {
                 // Todo find token in with value token in request
-                String token = authorizationHeader.substring("Bearer " .length());
+                String token = authorizationHeader.substring("Bearer ".length());
 
                 // 1. Abnormal : bat thuong
                 Token refreshTokenUsed = tokenService.findByRefreshTokenUsed(token).orElse(null);
@@ -69,11 +70,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     // remove
                     listByUser.forEach(tokenRepository::delete);
                     // send mail
-                    /*
-                     *  new GMailerServiceImpl().sendEmail(refreshTokenUsedBD.getCreateBy().getEmail(),
-                     *                             "Warning warning !!! Turborvip app",
-                     *                             "Another try attach your account you should change password now!");
-                      */
+
+                    new GMailerServiceImpl().sendEmail(refreshTokenUsedBD.getCreateBy().getEmail(),
+                            "Warning warning !!! Turborvip app",
+                            "Another try attach your account you should change password now!");
+
                     throw new ForbiddenException("Some thing wrong happened ! Please re login ! ");
                 }
 
