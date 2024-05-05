@@ -33,4 +33,7 @@ public interface AuthenticationResource {
 
     @PostMapping("auth/change-pass")
     ResponseEntity<?> changePass(@RequestBody ChangePassRequest changePassRequest, HttpServletRequest request);
+
+    @PostMapping("/all/forgot-pass")
+    ResponseEntity<?>  resetPass(@RequestBody Map<String, Object> requestBody);
 }

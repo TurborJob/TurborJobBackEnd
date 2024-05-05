@@ -116,4 +116,15 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
+
+    @Override
+    public ResponseEntity<?>  resetPass(Map<String, Object> requestBody) {
+        try{
+            String username = (String) requestBody.get("username");
+            authService.forgotPass(username);
+            return VsResponseUtil.ok("Reset password success please check mail!");
+        }catch (Exception e){
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 }

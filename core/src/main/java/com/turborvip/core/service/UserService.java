@@ -1,6 +1,7 @@
 package com.turborvip.core.service;
 
 import com.turborvip.core.domain.http.request.UpdateProfileRequest;
+import com.turborvip.core.model.dto.BusinessDTO;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.dto.UserDTO;
 import com.turborvip.core.model.entity.RateHistory;
@@ -34,4 +35,6 @@ public interface UserService {
     Profile updateProfile(HttpServletRequest request, UpdateProfileRequest updateProfileRequest) throws Exception;
 
     void updateBusiness(HttpServletRequest request) throws Exception;
+
+    BusinessDTO getBusinessStatistic(HttpServletRequest request) throws Exception;
 }

@@ -5,10 +5,8 @@ import com.turborvip.core.constant.CommonConstant;
 import com.turborvip.core.constant.DevMessageConstant;
 import com.turborvip.core.constant.EnumRole;
 import com.turborvip.core.domain.http.request.UpdateProfileRequest;
-import com.turborvip.core.domain.repositories.RateHistoryRepository;
-import com.turborvip.core.domain.repositories.RoleRepository;
-import com.turborvip.core.domain.repositories.UserRepository;
-import com.turborvip.core.domain.repositories.UserRoleRepository;
+import com.turborvip.core.domain.repositories.*;
+import com.turborvip.core.model.dto.BusinessDTO;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.entity.*;
 import com.turborvip.core.service.TokenService;
@@ -48,6 +46,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private final JobRepository jobRepository;
+
+    @Autowired
+    private final JobUserRepository jobUserRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -311,5 +315,31 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public BusinessDTO getBusinessStatistic(HttpServletRequest request) throws Exception{
+        User user = authService.getUserByHeader(request);
+        long totalJob = jobRepository.countByCreateBy(user);
+        long numJobSuccess = jobRepository.countByCreateByAndStatus(user,"success");
+        long numJobInActive = jobRepository.countByCreateByAndStatus(user, "inactive");
+        long numJobDone = jobRepository.countByCreateByAndStatus(user, "done");
+        long numJobProcessing = jobRepository.countByCreateByAndStatus(user, "processing");
+        long numJobFail = jobRepository.countByCreateByAndStatus(user,"fail");
 
+        long totalWorkerReqApply = jobUserRepository.countByJobId_CreateBy(user);
+        long numWorkerApprove = jobUserRepository.countByJobId_CreateByAndStatus(user, "approve");
+        long numWorkerReject = jobUserRepository.countByJobId_CreateByAndStatus(user,"reject");
+        long numWorkerPending = jobUserRepository.countByJobId_CreateByAndStatus(user, "pending");
+
+        long totalRating = rateHistoryRepository.countByFromUser(user);
+        long numRatingPending = rateHistoryRepository.countByFromUserAndRatingPoint(user,null);
+
+        UserRole userRole  = userRoleRepository.findByUserAndRole_Code(user, EnumRole.BUSINESS).orElse(null);
+        if(userRole == null){
+            throw new Exception("You not business!");
+        }
+
+        return new BusinessDTO(totalJob,numJobSuccess,numJobDone,numJobFail,numJobProcessing,numJobInActive,totalWorkerReqApply
+                ,numWorkerApprove,numWorkerReject, numWorkerPending,totalRating,numRatingPending,user.getRating(), user.getCountRate(),
+                userRole.getDueDate());
+    }
 }

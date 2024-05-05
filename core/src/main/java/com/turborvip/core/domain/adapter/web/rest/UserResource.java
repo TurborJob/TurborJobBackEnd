@@ -25,4 +25,6 @@ public interface UserResource {
     @PostMapping("user-only/update-business")
     ResponseEntity<?> updateProfile(HttpServletRequest request);
 
+    @PostMapping("business/get-business-statistic")
+    ResponseEntity<?> getBusinessStatistic(HttpServletRequest request);
 }

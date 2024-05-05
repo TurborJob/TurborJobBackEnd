@@ -26,4 +26,9 @@ public interface JobUserRepository extends JpaRepository<JobUser, Long> {
 
     boolean existsByUserIdAndStatusAndJobId_StartDateBetweenOrJobId_DueDateBetween(User userId, String status, Timestamp startDateStart, Timestamp startDateEnd, Timestamp dueDateStart, Timestamp dueDateEnd);
 
+    long countByJobId_CreateBy(User createBy);
+
+    long countByJobId_CreateByAndStatus(User createBy, String status);
+
+
 }

@@ -6,6 +6,7 @@ import com.turborvip.core.domain.http.response.ProfilesResponse;
 import com.turborvip.core.domain.repositories.JobRepository;
 import com.turborvip.core.domain.repositories.JobUserRepository;
 import com.turborvip.core.domain.repositories.RateHistoryRepository;
+import com.turborvip.core.model.dto.BusinessDTO;
 import com.turborvip.core.model.dto.JobDTO;
 import com.turborvip.core.model.dto.ProfileRequest;
 import com.turborvip.core.model.entity.Job;
@@ -285,4 +286,5 @@ public class JobServiceImpl implements JobService {
         }
         return job.getCreateBy().getId();
     }
+
 }

@@ -1,5 +1,6 @@
 package com.turborvip.core.config.application;
 
+import com.turborvip.core.constant.CommonConstant;
 import com.turborvip.core.domain.repositories.JobsRunTimeRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
 import com.turborvip.core.model.entity.JobsRunTime;
@@ -7,6 +8,7 @@ import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.service.impl.GMailerServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
@@ -126,8 +128,6 @@ public class ApplicationConfig {
 //            new GMailerServiceImpl().sendEmail("dothanhdat11032002@gmail.com",
 //                    "Warning warning !!! Turborvip app",
 //                    "Another try attach your account you should change password now!");
-
-
         };
     }
 

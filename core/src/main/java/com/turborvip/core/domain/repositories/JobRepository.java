@@ -52,5 +52,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
     List<Job> findByStartDateGreaterThanAndStatusIn(Timestamp startDate, Collection<String> statuses);
 
+    long countByCreateByAndStatus(User createBy, String status);
 
 }

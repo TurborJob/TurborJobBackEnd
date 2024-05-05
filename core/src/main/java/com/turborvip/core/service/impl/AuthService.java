@@ -17,6 +17,7 @@ import com.turborvip.core.util.RegexValidator;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -62,7 +63,7 @@ public class AuthService {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 
             User user = null;
-            if(authRequest.getUsername() !=  null) {
+            if (authRequest.getUsername() != null) {
                 user = userRepository.findByUsername(authRequest.getUsername()).orElse(null);
             }
 
@@ -71,11 +72,11 @@ public class AuthService {
                 List<UserRole> userRole = userRoleRepository.findByUser(user);
                 LocalDate currentDate = LocalDate.now();
                 userRole.forEach(i -> {
-                    if(i.getDueDate() == null){
+                    if (i.getDueDate() == null) {
                         roleDB.add(i.getRole());
-                    }else{
+                    } else {
                         LocalDate dueDate = i.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                        if (dueDate.isAfter(currentDate)){
+                        if (dueDate.isAfter(currentDate)) {
                             roleDB.add(i.getRole());
                         }
                     }
@@ -83,7 +84,7 @@ public class AuthService {
             }
 
             Collection<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            if (roleDB.isEmpty()){
+            if (roleDB.isEmpty()) {
                 throw new Exception("Role is null");
             }
 
@@ -93,7 +94,7 @@ public class AuthService {
             List<String> roles = authorities.stream().map(GrantedAuthority::getAuthority).toList();
             var jwtToken = jwtService.generateToken(user, roles, DEVICE_ID);
             var jwtRefreshToken = jwtService.generateRefreshToken(user, roles, DEVICE_ID, null);
-            AuthResponse authResponse = new AuthResponse(jwtToken,jwtRefreshToken, user.getProfile());
+            AuthResponse authResponse = new AuthResponse(jwtToken, jwtRefreshToken, user.getProfile());
             return VsResponseUtil.ok(LOGIN_SUCCESS, authResponse);
         } catch (Exception err) {
             log.warn(err.getMessage());
@@ -112,23 +113,23 @@ public class AuthService {
                 Token tokenExist = tokenService.findFirstTokenByValue(token).orElse(null);
                 if (tokenExist != null) {
                     List<Token> listToken = tokenService.findListTokenByUserAndDevice(tokenExist.getCreateBy().getId(), DEVICE_ID);
-                    if(listToken.isEmpty()){
+                    if (listToken.isEmpty()) {
                         throw new Exception("Token not found");
                     }
                     UserDevice userDevice = listToken.get(0).getUserDevices();
                     user = userDevice.getUser();
-                }else{
+                } else {
                     throw new Exception("Token not found");
                 }
             }
 
-            if(user == null){
+            if (user == null) {
                 throw new Exception("User not found!");
             }
 
             /* Do compare password */
             BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-            if(!encoder.matches(changePassRequest.getPassword(), user.getPassword())){
+            if (!encoder.matches(changePassRequest.getPassword(), user.getPassword())) {
                 throw new Exception("Old password is wrong");
             }
 
@@ -167,20 +168,40 @@ public class AuthService {
             Token tokenExist = tokenService.findFirstTokenByValue(token).orElse(null);
             if (tokenExist != null) {
                 List<Token> listToken = tokenService.findListTokenByUserAndDevice(tokenExist.getCreateBy().getId(), DEVICE_ID);
-                if(listToken.isEmpty()){
+                if (listToken.isEmpty()) {
                     throw new Exception("Token not found");
                 }
                 UserDevice userDevice = listToken.get(0).getUserDevices();
                 user = userDevice.getUser();
-            }else{
+            } else {
                 throw new Exception("Token not found");
             }
         }
 
-        if(user == null){
+        if (user == null) {
             throw new Exception("User not found!");
         }
         return user;
+    }
+
+    public void forgotPass(String username) throws Exception {
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            throw new Exception("Account not found!");
+        }
+
+        // Todo remove all token
+        List<Token> listByUser = tokenService.findByUserId(user.getId());
+        listByUser.forEach(tokenRepository::delete);
+
+        String randomPassword = RandomStringUtils.random(7, true, true) + "!";
+
+        user.setPassword(new BCryptPasswordEncoder().encode(randomPassword));
+        userRepository.save(user);
+
+        new GMailerServiceImpl().sendEmail(user.getEmail(),
+                "RESET PASSWORD - TURBORJOB",
+                "New Pass : " + randomPassword);
     }
 
 }
