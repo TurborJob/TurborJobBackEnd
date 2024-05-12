@@ -51,7 +51,7 @@ public class JwtService {
             if (userDevice != null) {
                 deviceService.updateLastLogin(now, userDevice.getDevice().getId());
             } else {
-                // create a section...
+                // create a session...
                 userDevice = userDeviceService.create(new UserDevice(new UserDeviceKey(user.getId(), device.getId()), user, device));
             }
 

@@ -96,6 +96,15 @@ public class User extends AbstractBase implements UserDetails {
     @JsonIgnore
     private Set<UserRole> userRole;
 
+    @OneToMany(mappedBy="user")
+    @JsonIgnore
+    private Set<Contact> items;
+
+    @Column(name = "status")
+    private String status = "active";
+    // active, inactive, lock
+
+
     @Override
     public int hashCode() {
         return Objects.hash(fullName, username, password, email, birthday, gender, phone, address, avatar);

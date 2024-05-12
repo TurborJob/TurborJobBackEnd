@@ -1,23 +1,13 @@
 package com.turborvip.core.config.application;
 
-import com.turborvip.core.constant.CommonConstant;
-import com.turborvip.core.domain.repositories.JobsRunTimeRepository;
 import com.turborvip.core.domain.repositories.UserRepository;
-import com.turborvip.core.model.entity.JobsRunTime;
 import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
-import com.turborvip.core.service.impl.GMailerServiceImpl;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.Point;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
@@ -30,8 +20,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.ArrayList;
-
 @Configuration
 @EnableScheduling
 @RequiredArgsConstructor
@@ -40,8 +28,6 @@ public class ApplicationConfig {
     @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
-    private final JobsRunTimeRepository jobsRunTimeRepository;
 
     @Autowired
     private final H3Service h3Service;
@@ -82,10 +68,10 @@ public class ApplicationConfig {
             Date now = new Date();
 
             HttpServletRequest request = null;
-            User superAdmin = new User("TurborvipSuperAdmin", "turborvipSuperAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
-            User user = new User("TurborvipUser", "turborvipUser", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
-            User admin = new User("TurborvipAdmin", "turborvipAdmin", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
-            User manager = new User("TurborvipManager", "turborvipManager", "123456a", "turborvip@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User superAdmin = new User("TurborvipSuperAdmin", "turborvipSuperAdmin", "12345678aB!", "turborvipSuperAdmin@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User user = new User("TurborvipUser", "turborvipUser", "12345678aB!", "turborvipUser@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User admin = new User("TurborvipAdmin", "turborvipAdmin", "12345678aB!", "turborvipAdmin@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
+            User manager = new User("TurborvipManager", "turborvipManager", "12345678aB!", "turborvipManger@gmail.com", now, null, null, null, null,5,0,0, new HashSet<>());
 
             userService.create(superAdmin, request);
             User superAdminCreated = userService.findById(superAdmin.getId()).orElse(null);

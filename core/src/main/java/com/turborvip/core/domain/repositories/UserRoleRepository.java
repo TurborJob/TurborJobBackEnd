@@ -16,4 +16,7 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
 
     Optional<UserRole> findByUserAndRole_Code(User user, EnumRole code);
 
+    long countByRole_Code(EnumRole code);
+
+
 }

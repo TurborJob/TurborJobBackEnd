@@ -27,4 +27,10 @@ public interface UserResource {
 
     @PostMapping("business/get-business-statistic")
     ResponseEntity<?> getBusinessStatistic(HttpServletRequest request);
+
+    @PostMapping("admin/get-admin-statistic")
+    ResponseEntity<?> getAdminStatistic();
+
+    @PostMapping("admin/get-user-by-admin")
+    ResponseEntity<?> getAccountByAdmin(@RequestBody Map<String, Object> requestBody);
 }

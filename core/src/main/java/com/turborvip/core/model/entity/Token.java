@@ -45,7 +45,7 @@ public class Token extends AbstractBase {
     private Timestamp expiresAt;
 
     @Embedded
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH})
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REMOVE})
     @JoinColumns({
             @JoinColumn(name="user_id", referencedColumnName="user_id"),
             @JoinColumn(name="device_id", referencedColumnName="device_id")

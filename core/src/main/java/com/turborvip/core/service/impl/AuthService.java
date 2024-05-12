@@ -69,6 +69,9 @@ public class AuthService {
 
             List<Role> roleDB = new ArrayList<>(List.of());
             if (user != null) {
+                if(Objects.equals(user.getStatus(), "lock")){
+                    throw new Exception("User is locked, please contact Admin to unlock!");
+                }
                 List<UserRole> userRole = userRoleRepository.findByUser(user);
                 LocalDate currentDate = LocalDate.now();
                 userRole.forEach(i -> {

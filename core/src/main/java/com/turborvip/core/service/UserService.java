@@ -1,6 +1,8 @@
 package com.turborvip.core.service;
 
 import com.turborvip.core.domain.http.request.UpdateProfileRequest;
+import com.turborvip.core.domain.http.response.AccountsResponse;
+import com.turborvip.core.model.dto.AdminStatistic;
 import com.turborvip.core.model.dto.BusinessDTO;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.dto.UserDTO;
@@ -37,4 +39,8 @@ public interface UserService {
     void updateBusiness(HttpServletRequest request) throws Exception;
 
     BusinessDTO getBusinessStatistic(HttpServletRequest request) throws Exception;
+
+    AdminStatistic getAdminStatistic() throws Exception;
+
+    AccountsResponse getAccountByAdmin(int page, int size) throws Exception;
 }

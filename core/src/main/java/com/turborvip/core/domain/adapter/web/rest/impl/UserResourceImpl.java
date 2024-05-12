@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @RestApiV1
 @RequiredArgsConstructor
 @Component("UserResourceImpl")
@@ -70,5 +72,26 @@ public class UserResourceImpl implements UserResource {
         }
     }
 
+    @Override
+    public ResponseEntity<?> getAdminStatistic() {
+        try {
+            return VsResponseUtil.ok("Business statistic success!", userService.getAdminStatistic());
+
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getAccountByAdmin(Map<String, Object> requestBody) {
+        try {
+            int page = (int) requestBody.get("page");
+            int size = (int) requestBody.get("size");
+            return VsResponseUtil.ok("Get account by admin success!", userService.getAccountByAdmin(page, size));
+
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
 
 }

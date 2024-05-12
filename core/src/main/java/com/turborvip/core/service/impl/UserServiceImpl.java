@@ -5,11 +5,15 @@ import com.turborvip.core.constant.CommonConstant;
 import com.turborvip.core.constant.DevMessageConstant;
 import com.turborvip.core.constant.EnumRole;
 import com.turborvip.core.domain.http.request.UpdateProfileRequest;
+import com.turborvip.core.domain.http.response.AccountsResponse;
 import com.turborvip.core.domain.repositories.*;
+import com.turborvip.core.model.dto.AdminStatistic;
 import com.turborvip.core.model.dto.BusinessDTO;
 import com.turborvip.core.model.dto.Profile;
 import com.turborvip.core.model.entity.*;
+import com.turborvip.core.service.ContactService;
 import com.turborvip.core.service.TokenService;
+import com.turborvip.core.service.UserDeviceService;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.util.RegexValidator;
 import com.turborvip.core.model.dto.UserDTO;
@@ -21,6 +25,9 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -38,6 +45,12 @@ import static org.springframework.http.HttpHeaders.USER_AGENT;
 @Transactional
 @Slf4j
 public class UserServiceImpl implements UserService {
+    @Autowired
+    private DeviceRepository deviceRepository;
+    @Autowired
+    private UserDeviceRepository userDeviceRepository;
+    @Autowired
+    private ContactRepository contactRepository;
     @Autowired
     private UserRoleRepository userRoleRepository;
 
@@ -63,6 +76,13 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final AuthService authService;
+
+    @Autowired
+    private final ContactService contactService;
+
+    @Autowired
+    private final UserDeviceService userDeviceService;
+
 
 
     @Override
@@ -341,5 +361,29 @@ public class UserServiceImpl implements UserService {
         return new BusinessDTO(totalJob,numJobSuccess,numJobDone,numJobFail,numJobProcessing,numJobInActive,totalWorkerReqApply
                 ,numWorkerApprove,numWorkerReject, numWorkerPending,totalRating,numRatingPending,user.getRating(), user.getCountRate(),
                 userRole.getDueDate());
+    }
+
+    @Override
+    public AdminStatistic getAdminStatistic() throws Exception{
+        long totalContacts = contactRepository.count();
+        long numContactReplied = contactRepository.countByUserNotNull();
+        long totalAccounts = userRepository.count();
+        long numAccountWorker = userRoleRepository.countByRole_Code(EnumRole.ROLE_USER);
+        long numAccountBusiness = userRoleRepository.countByRole_Code(EnumRole.BUSINESS);
+        long numAccountAdmin = userRoleRepository.countByRole_Code(EnumRole.ROLE_ADMIN);
+        long totalSessions = userDeviceRepository.count();
+        long totalDevices = deviceRepository.count();
+        return new AdminStatistic(totalContacts,numContactReplied,totalAccounts,numAccountWorker,numAccountBusiness,numAccountAdmin,totalSessions, totalDevices);
+    }
+
+    @Override
+    public AccountsResponse getAccountByAdmin(int page,int size) throws Exception{
+        Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
+        Pageable pageable = PageRequest.of(page, size, sort);
+        List<EnumRole> listRoleAdmin = new ArrayList<>();
+        listRoleAdmin.add(EnumRole.ROLE_ADMIN);
+        listRoleAdmin.add(EnumRole.ROLE_SUPER_ADMIN);
+        long total = userRepository.countByUserRole_Role_CodeNotIn(listRoleAdmin);
+        return new AccountsResponse(userRepository.findByUserRole_Role_CodeNotIn(listRoleAdmin, pageable), total);
     }
 }
