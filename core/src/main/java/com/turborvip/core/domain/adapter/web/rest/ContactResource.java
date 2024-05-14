@@ -18,6 +18,6 @@ public interface ContactResource {
     @PostMapping("/admin/reply-contact")
     ResponseEntity<RestData<?>> replyContact(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 
-    @GetMapping("/admin/get-all-contact")
+    @PostMapping("/admin/get-all-contact")
     ResponseEntity<RestData<?>> getAllContact(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 }

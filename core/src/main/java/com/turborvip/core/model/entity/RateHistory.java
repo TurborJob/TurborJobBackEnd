@@ -1,6 +1,7 @@
 package com.turborvip.core.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.turborvip.core.model.entity.base.AbstractBase;
 import com.turborvip.core.model.entity.base.AbstractBaseWithoutId;
 import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
 import jakarta.persistence.*;
@@ -16,17 +17,15 @@ import lombok.Setter;
 @NoArgsConstructor
 @Table(name = "rate_history", schema = "history")
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RateHistory extends AbstractBaseWithoutId {
-    @EmbeddedId
-    RateHistoryKey id;
+public class RateHistory extends AbstractBase {
 
     @ManyToOne
-    @MapsId("userId")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JoinColumn(name = "from_user_id")
     private User fromUser;
 
     @ManyToOne
-    @MapsId("userId")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JoinColumn(name = "to_user_id")
     private User toUser;
 

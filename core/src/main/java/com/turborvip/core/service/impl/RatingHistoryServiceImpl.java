@@ -47,19 +47,18 @@ public class RatingHistoryServiceImpl implements RatingHistoryService {
 
         List<UserJobInfo> userJobInfo = new ArrayList<>();
 
-        rateHistoryList.forEach(i -> userJobInfo.add(new UserJobInfo(i.getToUser().getProfileAndNote(null), i.getJobName())));
+        rateHistoryList.forEach(i -> userJobInfo.add(new UserJobInfo(i.getToUser().getProfileAndNote(null), i.getJobName(), i.getId())));
 
         return new RatingHistoryResponse(userJobInfo, numRateHistory);
     }
 
     @Override
-    public void rateUser(HttpServletRequest request, float value, String note, long toUser) throws Exception {
-        User userFrom = authService.getUserByHeader(request);
+    public void rateUser(HttpServletRequest request, float value, String note, long toUser, long rateId) throws Exception {
         User userTo = userRepository.findById(toUser).orElse(null);
         if (userTo == null){
             throw new Exception("User receiver not found!");
         }
-        RateHistory rateHistory = rateHistoryRepository.findByFromUserAndToUser(userFrom, userTo).orElse(null);
+        RateHistory rateHistory = rateHistoryRepository.findById(rateId).orElse(null);
         if (rateHistory == null){
             throw new Exception("Rate History not found!");
         }

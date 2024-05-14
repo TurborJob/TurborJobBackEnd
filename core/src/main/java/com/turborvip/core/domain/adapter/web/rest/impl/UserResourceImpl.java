@@ -6,6 +6,7 @@ import com.turborvip.core.domain.adapter.web.rest.UserResource;
 import com.turborvip.core.domain.http.request.UpdateProfileRequest;
 import com.turborvip.core.service.UserService;
 import com.turborvip.core.model.entity.User;
+import com.turborvip.core.service.impl.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ import java.util.Map;
 public class UserResourceImpl implements UserResource {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthService authService;
 
     @Override
     public ResponseEntity<?> create(User user, HttpServletRequest request) {
@@ -88,6 +92,21 @@ public class UserResourceImpl implements UserResource {
             int page = (int) requestBody.get("page");
             int size = (int) requestBody.get("size");
             return VsResponseUtil.ok("Get account by admin success!", userService.getAccountByAdmin(page, size));
+
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> adminUpdateStatusUser(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            String status = (String) requestBody.get("status");
+            int idUser = (int) requestBody.get("idUser");
+            User user = authService.getUserByHeader(request);
+
+            userService.adminUpdateStatusUser(user, status, idUser);
+            return VsResponseUtil.ok("Update status by admin success!");
 
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());

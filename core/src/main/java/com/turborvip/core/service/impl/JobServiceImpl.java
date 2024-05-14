@@ -6,17 +6,17 @@ import com.turborvip.core.domain.http.response.ProfilesResponse;
 import com.turborvip.core.domain.repositories.JobRepository;
 import com.turborvip.core.domain.repositories.JobUserRepository;
 import com.turborvip.core.domain.repositories.RateHistoryRepository;
-import com.turborvip.core.model.dto.BusinessDTO;
-import com.turborvip.core.model.dto.JobDTO;
-import com.turborvip.core.model.dto.ProfileRequest;
+import com.turborvip.core.model.dto.*;
 import com.turborvip.core.model.entity.Job;
 import com.turborvip.core.model.entity.JobUser;
 import com.turborvip.core.model.entity.RateHistory;
 import com.turborvip.core.model.entity.User;
 import com.turborvip.core.model.entity.compositeKey.JobUserKey;
 import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
+import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.JobService;
 import com.turborvip.core.service.NotificationService;
+import com.uber.h3core.exceptions.DistanceUndefinedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +27,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +41,9 @@ public class JobServiceImpl implements JobService {
     private final RateHistoryRepository rateHistoryRepository;
     private final JobUserRepository jobUserRepository;
     private final JobRepository jobRepository;
+
+    @Autowired
+    private final H3Service h3Service;
 
     @Autowired
     private final AuthService authService;
@@ -92,7 +96,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page, int size, double lng, double lat) throws Exception {
+    public JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page, int size, double lng, double lat, Integer salaryFrom, Integer salaryTo, Boolean isVehicle) throws Exception {
         User user = authService.getUserByHeader(request);
         Pageable pageable = PageRequest.of(page, size);
         List<String> genderQuery = new ArrayList<>();
@@ -106,14 +110,34 @@ public class JobServiceImpl implements JobService {
         List<Job> jobs = new ArrayList<>();
 
         if (jobsIdApplied.isEmpty()) {
-            total = jobRepository.countByCreateByNotAndStatusAndGenderIn(user, "processing", genderQuery);
-            jobs = jobRepository.findNearestJobsWithoutUser(user, genderQuery, "processing", lng, lat, pageable);
+            if (salaryFrom != null && salaryTo != null && isVehicle != null) {
+                total = jobRepository.countByCreateByNotAndStatusAndGenderInAndIsVehicleAndSalaryBetween(user, "processing", genderQuery, (boolean)
+                        isVehicle, (float) salaryFrom, (float) salaryTo);
+                jobs = jobRepository.findNearestJobsWithoutUserAndFilter(user, genderQuery, "processing", lng, lat, isVehicle, (float) salaryFrom, (float) salaryTo, pageable);
+            } else {
+                total = jobRepository.countByCreateByNotAndStatusAndGenderIn(user, "processing", genderQuery);
+                jobs = jobRepository.findNearestJobsWithoutUser(user, genderQuery, "processing", lng, lat, pageable);
+            }
         } else {
-            total = jobRepository.countByCreateByNotAndStatusAndGenderInAndIdNotIn(user, "processing", genderQuery, jobsIdApplied);
-            jobs = jobRepository.findNearestJobsWithoutUserWithNotIn(jobsIdApplied, user, genderQuery, "processing", lng, lat, pageable);
+            if (salaryFrom != null && salaryTo != null && isVehicle != null) {
+                total = jobRepository.countByCreateByNotAndStatusAndGenderInAndIdNotInAndIsVehicleAndSalaryBetween(user, "processing", genderQuery,
+                        jobsIdApplied, (boolean) isVehicle, (float) salaryFrom, (float) salaryTo);
+                jobs = jobRepository.findNearestJobsWithoutUserWithNotInAndFilter(jobsIdApplied, user, genderQuery, "processing", lng, lat, isVehicle, (float) salaryFrom,
+                        (float) salaryTo, pageable);
+            } else {
+                total = jobRepository.countByCreateByNotAndStatusAndGenderInAndIdNotIn(user, "processing", genderQuery, jobsIdApplied);
+                jobs = jobRepository.findNearestJobsWithoutUserWithNotIn(jobsIdApplied, user, genderQuery, "processing", lng, lat, pageable);
+            }
         }
 
-        return new JobsResponse(jobs, total);
+        List<JobWithDistance> listJobDistance = new ArrayList<>();
+        jobs.forEach(i -> {
+            double distance = h3Service.haversineDistance(lng, lat, i.getCoordinates().getX(), i.getCoordinates().getY());
+            JobWithDistance jobDistance = new JobWithDistance(i, distance);
+            listJobDistance.add(jobDistance);
+        });
+
+        return new JobsResponse(listJobDistance, total);
     }
 
     @Override
@@ -151,15 +175,15 @@ public class JobServiceImpl implements JobService {
             throw new Exception("exceeded the number of workers");
         }
 
-        boolean checkTime = jobUserRepository.existsByUserIdAndStatusAndJobId_StartDateBetweenOrJobId_DueDateBetween(user,"approve"
-                ,job.getStartDate(),job.getDueDate(),job.getStartDate(),job.getDueDate());
+        boolean checkTime = jobUserRepository.existsByUserIdAndStatusAndJobId_StartDateBetweenOrJobId_DueDateBetween(user, "approve"
+                , job.getStartDate(), job.getDueDate(), job.getStartDate(), job.getDueDate());
 
-        if(checkTime){
+        if (checkTime) {
             throw new Exception("You do not satisfy the time requirement (due to other work during the corresponding time)");
         }
 
         jobUserRepository.save(new JobUser(new JobUserKey(job.getId(), user.getId()), user, job, "pending", description));
-        String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
+        String note = "From " + user.getFullName() + " (" + job.getName() + ") : " + description;
         notificationService.createNotificationApplyReqForBusiness(user, job.getCreateBy(), note, "push");
         jobRepository.save(job);
     }
@@ -179,7 +203,7 @@ public class JobServiceImpl implements JobService {
         jobUser.setStatus("approve");
 
         job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent() + 1);
-        String note = "From "+ user.getFullName() + " (" + job.getName() + ") : " + description;
+        String note = "From " + user.getFullName() + " (" + job.getName() + ") : " + description;
         notificationService.createNotificationApproveReqForWorker(job, user, jobUser.getUserId(), note, "push");
         if (job.getQuantityWorkerCurrent() == job.getQuantityWorkerTotal()) {
             job.setStatus("success");
@@ -197,7 +221,7 @@ public class JobServiceImpl implements JobService {
         }
         jobUser.setStatus("reject");
         jobUserRepository.save(jobUser);
-        String note = "From "+ user.getFullName() + " (" + jobUser.getJobId().getName() + ") : " + description;
+        String note = "From " + user.getFullName() + " (" + jobUser.getJobId().getName() + ") : " + description;
         notificationService.createNotificationRejectReqForWorker(jobUser.getJobId(), user, jobUser.getUserId(), note, "push");
     }
 
@@ -245,14 +269,12 @@ public class JobServiceImpl implements JobService {
 
         for (User user : users) {
             /* Todo rate from worker to Business*/
-            RateHistoryKey rateHistoryKeyWorkerBusiness = new RateHistoryKey(user.getId(), ownerJob.getId());
-            RateHistory rateHistoryWorkerBusiness = new RateHistory(rateHistoryKeyWorkerBusiness, user, ownerJob, job.getName(), null, null);
+            RateHistory rateHistoryWorkerBusiness = new RateHistory(user, ownerJob, job.getName(), null, null);
             rateHistories.add(rateHistoryWorkerBusiness);
             //notificationService.createNotificationRejectReqForWorker(job, user, ownerJob, "Please rating for me!", "push");
 
             /* Todo rate from Business to Worker*/
-            RateHistoryKey rateHistoryKeyBusinessWorker = new RateHistoryKey(ownerJob.getId(), user.getId());
-            RateHistory rateHistoryBusinessWorker = new RateHistory(rateHistoryKeyBusinessWorker, ownerJob, user, job.getName(), null, null);
+            RateHistory rateHistoryBusinessWorker = new RateHistory(ownerJob, user, job.getName(), null, null);
             rateHistories.add(rateHistoryBusinessWorker);
         }
         rateHistoryRepository.saveAll(rateHistories);
@@ -261,7 +283,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public boolean checkJobIsSuccess(long jobId) throws Exception {
         Job job = jobRepository.findById(jobId).orElse(null);
-        if(job == null){
+        if (job == null) {
             throw new Exception("Job invalid!");
         }
         return job.getStatus().equals("success");
@@ -275,13 +297,13 @@ public class JobServiceImpl implements JobService {
         statuses.add("inactive");
         statuses.add("processing");
         List<Job> jobs = jobRepository.findByStartDateGreaterThanAndStatusIn(new Timestamp(now.getTime()), statuses);
-        jobs.forEach(i->i.setStatus("fail"));
+        jobs.forEach(i -> i.setStatus("fail"));
     }
 
     @Override
     public long findUserIdByJobId(long jobId) throws Exception {
         Job job = jobRepository.findById(jobId).orElse(null);
-        if (job == null){
+        if (job == null) {
             throw new Exception("Job invalid");
         }
         return job.getCreateBy().getId();

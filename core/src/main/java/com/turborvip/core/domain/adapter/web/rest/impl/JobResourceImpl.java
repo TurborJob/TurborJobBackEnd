@@ -59,7 +59,11 @@ public class JobResourceImpl implements JobResource {
             double lng = (double) requestBody.get("long");
             double lat = (double) requestBody.get("lat");
 
-            return VsResponseUtil.ok("Get job successfully!", jobService.getNormalJobInsideUser(request, page, size, lat, lng));
+            Integer salaryFrom = (Integer) requestBody.get("salaryFrom");
+            Integer salaryTo = (Integer) requestBody.get("salaryTo");
+            Boolean isVehicle = (Boolean) requestBody.get("isVehicle");
+
+            return VsResponseUtil.ok("Get job successfully!", jobService.getNormalJobInsideUser(request, page, size, lat, lng, salaryFrom,  salaryTo,  isVehicle));
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }

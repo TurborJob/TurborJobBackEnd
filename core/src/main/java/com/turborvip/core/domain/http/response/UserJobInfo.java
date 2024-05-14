@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class UserJobInfo {
    private ProfileRequest user;
    private String jobName;
+   private Long rateId;
 }

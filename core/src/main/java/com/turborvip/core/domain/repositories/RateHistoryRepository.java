@@ -23,4 +23,7 @@ public interface RateHistoryRepository extends JpaRepository<RateHistory, Long> 
 
     long countByFromUser(User fromUser);
 
+    List<RateHistory> findByToUserAndRatingPointNotNull(User toUser);
+
+
 }

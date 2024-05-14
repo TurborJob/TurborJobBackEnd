@@ -114,6 +114,7 @@ public class ApplicationConfig {
 //            new GMailerServiceImpl().sendEmail("dothanhdat11032002@gmail.com",
 //                    "Warning warning !!! Turborvip app",
 //                    "Another try attach your account you should change password now!");
+
         };
     }
 

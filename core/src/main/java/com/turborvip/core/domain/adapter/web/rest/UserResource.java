@@ -33,4 +33,7 @@ public interface UserResource {
 
     @PostMapping("admin/get-user-by-admin")
     ResponseEntity<?> getAccountByAdmin(@RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("admin/update-status-user-by-admin")
+    ResponseEntity<?> adminUpdateStatusUser(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 }

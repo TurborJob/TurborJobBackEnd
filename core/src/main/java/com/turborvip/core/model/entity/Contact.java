@@ -32,6 +32,7 @@ public class Contact extends AbstractBaseWithoutId {
     private String content;
 
     @ManyToOne
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     @JoinColumn(name="userReply ", nullable=true)
     private User user;
 

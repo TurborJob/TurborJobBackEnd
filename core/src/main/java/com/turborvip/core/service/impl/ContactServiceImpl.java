@@ -4,7 +4,6 @@ import com.turborvip.core.domain.repositories.ContactRepository;
 import com.turborvip.core.model.entity.Contact;
 import com.turborvip.core.model.entity.User;
 import com.turborvip.core.service.ContactService;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,14 +32,13 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public void replyContact(HttpServletRequest request, Long idContent, String content) throws Exception {
-        User user = authService.getUserByHeader(request);
+    public void replyContact(User admin, long idContent, String content) throws Exception {
         Contact contact = contactRepository.findById(idContent).orElse(null);
         if (contact == null) {
             throw new Exception("Contact invalid!");
         }
         Date now = new Date();
-        contact.setUser(user);
+        contact.setUser(admin);
         contact.setUpdateAt(new Timestamp(now.getTime()));
         contactRepository.save(contact);
         new GMailerServiceImpl().sendEmail(contact.getEmail(),
@@ -54,5 +52,6 @@ public class ContactServiceImpl implements ContactService {
         Pageable pageable = PageRequest.of(page, size, sort);
         return contactRepository.findAll(pageable);
     }
+
 
 }

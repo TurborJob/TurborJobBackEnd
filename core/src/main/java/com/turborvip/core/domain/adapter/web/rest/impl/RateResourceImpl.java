@@ -35,7 +35,8 @@ public class RateResourceImpl implements RateResource {
             int valueRate = (int) requestBody.get("rateValue");
             String note = (String) requestBody.get("note");
             int toUserId = (int) requestBody.get("toUser");
-            ratingHistoryService.rateUser(request, (float) valueRate, note, (long) toUserId);
+            int rateId = (int) requestBody.get("rateId");
+            ratingHistoryService.rateUser(request, (float) valueRate, note, (long) toUserId, (long) rateId);
             return VsResponseUtil.ok("Rate successfully!");
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());

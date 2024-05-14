@@ -21,7 +21,7 @@ public interface JobService {
 
     void findNormalJobRunTime(User user, long jobId) throws Exception;
 
-    JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page , int size, double lng, double lat) throws Exception;
+    JobsResponse getNormalJobInsideUser(HttpServletRequest request, int page , int size, double lng, double lat, Integer salaryFrom, Integer salaryTo, Boolean isVehicle) throws Exception;
 
     JobsResponse getRunTimeJob(User user, int page, int size, double lng, double lat) throws Exception;
 

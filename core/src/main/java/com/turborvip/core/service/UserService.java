@@ -43,4 +43,6 @@ public interface UserService {
     AdminStatistic getAdminStatistic() throws Exception;
 
     AccountsResponse getAccountByAdmin(int page, int size) throws Exception;
+
+    void adminUpdateStatusUser(User admin, String status, long idUser) throws Exception;
 }

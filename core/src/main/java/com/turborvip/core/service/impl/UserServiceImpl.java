@@ -32,6 +32,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -185,7 +186,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserAfterRate(User toUser) {
-        List<RateHistory> listRatedUser = rateHistoryRepository.findByToUser(toUser);
+        List<RateHistory> listRatedUser = rateHistoryRepository.findByToUserAndRatingPointNotNull(toUser);
         float ratePointUser = 0;
         float averageRatePoint = 5;
 
@@ -385,5 +386,18 @@ public class UserServiceImpl implements UserService {
         listRoleAdmin.add(EnumRole.ROLE_SUPER_ADMIN);
         long total = userRepository.countByUserRole_Role_CodeNotIn(listRoleAdmin);
         return new AccountsResponse(userRepository.findByUserRole_Role_CodeNotIn(listRoleAdmin, pageable), total);
+    }
+
+    @Override
+    public void adminUpdateStatusUser(User admin, String status, long idUser) throws Exception{
+        User user = userRepository.findById(idUser).orElse(null);
+        if(user == null){
+            throw new Exception("User invalid!");
+        }
+        Date now = new Date();
+        user.setStatus(status);
+        user.setUpdateBy(admin);
+        user.setUpdateAt(new Timestamp(now.getTime()));
+        userRepository.save(user);
     }
 }

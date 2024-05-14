@@ -7,5 +7,5 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface RatingHistoryService {
     RatingHistoryResponse getRating(HttpServletRequest request, int page, int size) throws Exception;
 
-    void rateUser(HttpServletRequest request, float value, String note, long toUser) throws Exception;
+    void rateUser(HttpServletRequest request, float value, String note, long toUser, long rateId) throws Exception;
 }

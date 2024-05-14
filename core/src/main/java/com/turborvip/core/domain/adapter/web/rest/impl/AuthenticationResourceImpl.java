@@ -52,6 +52,9 @@ public class AuthenticationResourceImpl implements AuthenticationResource {
             return authService.authenticate(authRequest, request);
         } catch (Exception e) {
             log.error(e.getMessage());
+            if(!e.getMessage().isEmpty()){
+                return VsResponseUtil.error(HttpStatus.UNAUTHORIZED, e.getMessage());
+            }
             return VsResponseUtil.error(HttpStatus.UNAUTHORIZED, LOGIN_FAIL);
         }
     }
