@@ -3,8 +3,10 @@ package com.turborvip.core.domain.adapter.web.rest;
 import com.turborvip.core.domain.adapter.web.base.RestData;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
+@Controller
 public interface DemoResource {
     @GetMapping("/all/test")
     ResponseEntity<?> test(HttpServletRequest request);

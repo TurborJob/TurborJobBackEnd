@@ -113,4 +113,18 @@ public class UserResourceImpl implements UserResource {
         }
     }
 
+    @Override
+    public ResponseEntity<?> extendRoleBusiness(HttpServletRequest request, Map<String, Object> requestBody) {
+        try {
+            int numDayExtend = (int) requestBody.get("numDayExtend");
+            int limitJobInDay = (int) requestBody.get("limitJobInDay");
+            int limitWorkerInDay = (int) requestBody.get("limitWorkerInDay");
+            User user = authService.getUserByHeader(request);
+            userService.extendRoleBusiness(user, numDayExtend, limitJobInDay,limitWorkerInDay);
+            return VsResponseUtil.ok("Extend success!");
+        } catch (Exception e) {
+            return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
 }

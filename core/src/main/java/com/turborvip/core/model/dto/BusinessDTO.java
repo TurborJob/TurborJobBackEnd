@@ -33,4 +33,9 @@ public class BusinessDTO {
     long numReviewer;
 
     Date timeExpire;
+    long limitJobPerDay;
+    long limitWorkerPerDay;
+
+    long numJobSuccessToDay;
+    long numWorkerApproveToday;
 }

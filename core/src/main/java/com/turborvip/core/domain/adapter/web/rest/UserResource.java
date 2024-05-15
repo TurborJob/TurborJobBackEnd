@@ -5,12 +5,14 @@ import com.turborvip.core.domain.http.request.UpdateProfileRequest;
 import com.turborvip.core.model.entity.User;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.Map;
 
+@Controller
 @Validated
 public interface UserResource {
     @PostMapping("/no-auth/create-user")
@@ -36,4 +38,7 @@ public interface UserResource {
 
     @PostMapping("admin/update-status-user-by-admin")
     ResponseEntity<?> adminUpdateStatusUser(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
+
+    @PostMapping("business/extend-business")
+    ResponseEntity<?> extendRoleBusiness(HttpServletRequest request, @RequestBody Map<String, Object> requestBody);
 }

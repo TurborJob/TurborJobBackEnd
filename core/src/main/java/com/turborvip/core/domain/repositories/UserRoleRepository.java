@@ -19,4 +19,5 @@ public interface UserRoleRepository extends JpaRepository<UserRole, Long> {
     long countByRole_Code(EnumRole code);
 
 
+
 }

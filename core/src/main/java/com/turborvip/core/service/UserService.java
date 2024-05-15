@@ -16,7 +16,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-
 public interface UserService {
     User create(User user, HttpServletRequest request);
 
@@ -26,7 +25,7 @@ public interface UserService {
 
     Role saveRole(Role role);
 
-    void addToUser(String username, String role_name, Date dueDate);
+    void addToUser(String username, String role_name) throws Exception;
 
     void updateUserAfterRate(User toUser);
 
@@ -37,6 +36,10 @@ public interface UserService {
     Profile updateProfile(HttpServletRequest request, UpdateProfileRequest updateProfileRequest) throws Exception;
 
     void updateBusiness(HttpServletRequest request) throws Exception;
+
+    void extendRoleBusiness(User user, int numDayExtend, long limitJobInDay, long limitWorkerInDay) throws Exception;
+
+    void checkLimitRoleBusiness(User user) throws Exception;
 
     BusinessDTO getBusinessStatistic(HttpServletRequest request) throws Exception;
 

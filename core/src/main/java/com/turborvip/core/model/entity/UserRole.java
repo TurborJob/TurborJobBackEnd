@@ -35,6 +35,21 @@ public class UserRole extends AbstractBase {
     @JsonIgnore
     private Role role;
 
-    @Column(name = "due_date")
+    @Column(name = "num_extend",nullable=true)
+    private long numExtend;
+
+
+    @Column(name = "due_date",nullable=true)
     private Date dueDate;
+
+    @Column(name = "limit_job_in_day",nullable=true)
+    private long limitJobInDay;
+
+    @Column(name = "limit_worker_in_day",nullable=true)
+    private long limitWorkerInDay;
+
+    public UserRole(User user, Role role) {
+        this.user = user;
+        this.role = role;
+    }
 }

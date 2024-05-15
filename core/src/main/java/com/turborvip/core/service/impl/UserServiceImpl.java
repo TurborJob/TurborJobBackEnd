@@ -73,6 +73,9 @@ public class UserServiceImpl implements UserService {
     private final RateHistoryRepository rateHistoryRepository;
 
     @Autowired
+    private final UserStatisticRepository userStatisticRepository;
+
+    @Autowired
     private final TokenService tokenService;
 
     @Autowired
@@ -83,7 +86,6 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private final UserDeviceService userDeviceService;
-
 
 
     @Override
@@ -152,10 +154,10 @@ public class UserServiceImpl implements UserService {
             Role roleUser = roleRepository.findRoleByCode(EnumRole.ROLE_USER);
             User user = new User(userDTO.getFullName(), userDTO.getUsername(), new BCryptPasswordEncoder().encode(userDTO.getPassword()),
                     userDTO.getEmail(), birthday, userDTO.getGender(), userDTO.getPhone(), userDTO.getAddress(), userDTO.getAvatar(),
-                    5,0, 0,userDTO.getLat(),userDTO.getLng(), new HashSet<>());
+                    5, 0, 0, userDTO.getLat(), userDTO.getLng(), new HashSet<>());
             user = userRepository.save(user);
 
-            UserRole userRole = new UserRole(user, roleUser, null);
+            UserRole userRole = new UserRole(user, roleUser);
 
             userRoleRepository.save(userRole);
             return user;
@@ -176,11 +178,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void addToUser(String username, String role_name, Date dueDate) {
+    public void addToUser(String username, String role_name) throws Exception {
 
-        User user = userRepository.findByUsername(username).get();
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            throw new Exception("User not found!");
+        }
         Role role = roleRepository.findRoleByCode(EnumRole.valueOf(role_name));
-        UserRole userRole = new UserRole(user, role, dueDate);
+        UserRole userRole = new UserRole(user, role);
         userRoleRepository.save(userRole);
     }
 
@@ -221,11 +226,11 @@ public class UserServiceImpl implements UserService {
         List<Role> roles = new ArrayList<>(List.of());
         LocalDate currentDate = LocalDate.now();
         userRole.forEach(i -> {
-            if(i.getDueDate() == null){
+            if (i.getDueDate() == null) {
                 roles.add(i.getRole());
-            }else{
+            } else {
                 LocalDate dueDate = i.getDueDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-                if (dueDate.isAfter(currentDate)){
+                if (dueDate.isAfter(currentDate)) {
                     roles.add(i.getRole());
                 }
             }
@@ -246,17 +251,17 @@ public class UserServiceImpl implements UserService {
                 Token tokenExist = tokenService.findFirstTokenByValue(token).orElse(null);
                 if (tokenExist != null) {
                     List<Token> listToken = tokenService.findListTokenByUserAndDevice(tokenExist.getCreateBy().getId(), DEVICE_ID);
-                    if(listToken.isEmpty()){
+                    if (listToken.isEmpty()) {
                         throw new Exception("Token not found");
                     }
                     UserDevice userDevice = listToken.get(0).getUserDevices();
                     user = userDevice.getUser();
-                }else{
+                } else {
                     throw new Exception("Token not found");
                 }
             }
 
-            if(user == null){
+            if (user == null) {
                 throw new Exception("User not found!");
             }
 
@@ -306,9 +311,9 @@ public class UserServiceImpl implements UserService {
             user.setGender(updateProfileRequest.getGender());
             user.setPhone(updateProfileRequest.getPhone());
 
-            if(updateProfileRequest.getLat() != null && updateProfileRequest.getLng() != null){
+            if (updateProfileRequest.getLat() != null && updateProfileRequest.getLng() != null) {
                 GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
-                user.setCoordinates(geometryFactory.createPoint(new Coordinate(updateProfileRequest.getLat(),updateProfileRequest.getLng())));
+                user.setCoordinates(geometryFactory.createPoint(new Coordinate(updateProfileRequest.getLat(), updateProfileRequest.getLng())));
             }
             return userRepository.save(user).getProfile();
         } catch (Exception err) {
@@ -319,7 +324,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateBusiness(HttpServletRequest request) throws Exception {
-        try{
+        try {
             Date currentDate = new Date();
 
             Calendar calendar = Calendar.getInstance();
@@ -329,43 +334,116 @@ public class UserServiceImpl implements UserService {
 
             User user = authService.getUserByHeader(request);
 
-            addToUser(user.getUsername(), String.valueOf(EnumRole.BUSINESS),futureDate);
-        } catch (Exception e){
+            Role role = roleRepository.findRoleByCode(EnumRole.BUSINESS);
+
+            // Todo default first time with 30day, limit job = 2/day, limit worker = 5/day
+            UserRole userRole = new UserRole(user, role, 1, futureDate, 2, 5);
+            userRoleRepository.save(userRole);
+
+        } catch (Exception e) {
             log.error(e.getMessage());
             throw e;
         }
     }
 
     @Override
-    public BusinessDTO getBusinessStatistic(HttpServletRequest request) throws Exception{
-        User user = authService.getUserByHeader(request);
-        long totalJob = jobRepository.countByCreateBy(user);
-        long numJobSuccess = jobRepository.countByCreateByAndStatus(user,"success");
-        long numJobInActive = jobRepository.countByCreateByAndStatus(user, "inactive");
-        long numJobDone = jobRepository.countByCreateByAndStatus(user, "done");
-        long numJobProcessing = jobRepository.countByCreateByAndStatus(user, "processing");
-        long numJobFail = jobRepository.countByCreateByAndStatus(user,"fail");
+    public void extendRoleBusiness(User user, int numDayExtend, long limitJobInDay, long limitWorkerInDay) throws Exception {
+        try {
+            UserRole userRoleBusiness = userRoleRepository.findByUserAndRole_Code(user, EnumRole.BUSINESS).orElse(null);
+            if (userRoleBusiness == null) {
+                throw new Exception("User not a business!");
+            }
 
-        long totalWorkerReqApply = jobUserRepository.countByJobId_CreateBy(user);
-        long numWorkerApprove = jobUserRepository.countByJobId_CreateByAndStatus(user, "approve");
-        long numWorkerReject = jobUserRepository.countByJobId_CreateByAndStatus(user,"reject");
-        long numWorkerPending = jobUserRepository.countByJobId_CreateByAndStatus(user, "pending");
+            //Todo get future date extend
+            Date currentDate = new Date();
+            if (userRoleBusiness.getDueDate().compareTo(currentDate) > 0) {
+                currentDate = userRoleBusiness.getDueDate();
+            }
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(currentDate);
+            calendar.add(Calendar.DAY_OF_MONTH, numDayExtend);
+            Date futureDate = calendar.getTime();
 
-        long totalRating = rateHistoryRepository.countByFromUser(user);
-        long numRatingPending = rateHistoryRepository.countByFromUserAndRatingPoint(user,null);
-
-        UserRole userRole  = userRoleRepository.findByUserAndRole_Code(user, EnumRole.BUSINESS).orElse(null);
-        if(userRole == null){
-            throw new Exception("You not business!");
+            userRoleBusiness.setNumExtend(userRoleBusiness.getNumExtend() + 1);
+            userRoleBusiness.setLimitJobInDay(limitJobInDay);
+            userRoleBusiness.setLimitWorkerInDay(limitWorkerInDay);
+            userRoleBusiness.setDueDate(futureDate);
+            userRoleRepository.save(userRoleBusiness);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
         }
-
-        return new BusinessDTO(totalJob,numJobSuccess,numJobDone,numJobFail,numJobProcessing,numJobInActive,totalWorkerReqApply
-                ,numWorkerApprove,numWorkerReject, numWorkerPending,totalRating,numRatingPending,user.getRating(), user.getCountRate(),
-                userRole.getDueDate());
     }
 
     @Override
-    public AdminStatistic getAdminStatistic() throws Exception{
+    public void checkLimitRoleBusiness(User user) throws Exception {
+        try {
+            UserRole userRoleBusiness = userRoleRepository.findByUserAndRole_Code(user, EnumRole.BUSINESS).orElse(null);
+            if (userRoleBusiness == null) {
+                throw new Exception("User is not business!");
+            }
+
+            UserStatistic userStatistic = userStatisticRepository.findByUser(user).orElse(null);
+            if (userStatistic == null) {
+                throw new Exception("User statistic is not found!");
+            }
+
+            // Todo check due date
+            Date dateNow = new Date();
+            if (dateNow.compareTo(userRoleBusiness.getDueDate()) > 0) {
+                throw new Exception("Please extend business!");
+            }
+
+            // Todo check limit job in day
+            if (userStatistic.getJobSuccessInDay() > userRoleBusiness.getLimitJobInDay()) {
+                throw new Exception("Limit job in day no more than " + userRoleBusiness.getLimitJobInDay() + " jobs");
+            }
+
+            // Todo check limit worker in day
+            if (userStatistic.getUserApproveInDay() > userRoleBusiness.getLimitWorkerInDay()) {
+                throw new Exception("Limit worker in day no more than " + userRoleBusiness.getLimitWorkerInDay() + " worker");
+            }
+        } catch (Exception e) {
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+
+    @Override
+    public BusinessDTO getBusinessStatistic(HttpServletRequest request) throws Exception {
+        User user = authService.getUserByHeader(request);
+        long totalJob = jobRepository.countByCreateBy(user);
+        long numJobSuccess = jobRepository.countByCreateByAndStatus(user, "success");
+        long numJobInActive = jobRepository.countByCreateByAndStatus(user, "inactive");
+        long numJobDone = jobRepository.countByCreateByAndStatus(user, "done");
+        long numJobProcessing = jobRepository.countByCreateByAndStatus(user, "processing");
+        long numJobFail = jobRepository.countByCreateByAndStatus(user, "fail");
+
+        long totalWorkerReqApply = jobUserRepository.countByJobId_CreateBy(user);
+        long numWorkerApprove = jobUserRepository.countByJobId_CreateByAndStatus(user, "approve");
+        long numWorkerReject = jobUserRepository.countByJobId_CreateByAndStatus(user, "reject");
+        long numWorkerPending = jobUserRepository.countByJobId_CreateByAndStatus(user, "pending");
+
+        long totalRating = rateHistoryRepository.countByFromUser(user);
+        long numRatingPending = rateHistoryRepository.countByFromUserAndRatingPoint(user, null);
+
+        UserRole userRole = userRoleRepository.findByUserAndRole_Code(user, EnumRole.BUSINESS).orElse(null);
+        if (userRole == null) {
+            throw new Exception("You are not business!");
+        }
+
+        UserStatistic userStatistic = userStatisticRepository.findByUser(user).orElse(null);
+        if (userStatistic == null) {
+            throw new Exception("You are not have statistic!");
+        }
+
+        return new BusinessDTO(totalJob, numJobSuccess, numJobDone, numJobFail, numJobProcessing, numJobInActive, totalWorkerReqApply
+                , numWorkerApprove, numWorkerReject, numWorkerPending, totalRating, numRatingPending, user.getRating(), user.getCountRate(),
+                userRole.getDueDate(), userRole.getLimitJobInDay(), userRole.getLimitWorkerInDay(), userStatistic.getJobSuccessInDay(), userStatistic.getUserApproveInDay());
+    }
+
+    @Override
+    public AdminStatistic getAdminStatistic() throws Exception {
         long totalContacts = contactRepository.count();
         long numContactReplied = contactRepository.countByUserNotNull();
         long totalAccounts = userRepository.count();
@@ -374,11 +452,11 @@ public class UserServiceImpl implements UserService {
         long numAccountAdmin = userRoleRepository.countByRole_Code(EnumRole.ROLE_ADMIN);
         long totalSessions = userDeviceRepository.count();
         long totalDevices = deviceRepository.count();
-        return new AdminStatistic(totalContacts,numContactReplied,totalAccounts,numAccountWorker,numAccountBusiness,numAccountAdmin,totalSessions, totalDevices);
+        return new AdminStatistic(totalContacts, numContactReplied, totalAccounts, numAccountWorker, numAccountBusiness, numAccountAdmin, totalSessions, totalDevices);
     }
 
     @Override
-    public AccountsResponse getAccountByAdmin(int page,int size) throws Exception{
+    public AccountsResponse getAccountByAdmin(int page, int size) throws Exception {
         Sort sort = Sort.by(Sort.Direction.DESC, "createAt");
         Pageable pageable = PageRequest.of(page, size, sort);
         List<EnumRole> listRoleAdmin = new ArrayList<>();
@@ -389,9 +467,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void adminUpdateStatusUser(User admin, String status, long idUser) throws Exception{
+    public void adminUpdateStatusUser(User admin, String status, long idUser) throws Exception {
         User user = userRepository.findById(idUser).orElse(null);
-        if(user == null){
+        if (user == null) {
             throw new Exception("User invalid!");
         }
         Date now = new Date();

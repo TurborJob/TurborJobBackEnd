@@ -7,15 +7,10 @@ import com.turborvip.core.domain.repositories.JobRepository;
 import com.turborvip.core.domain.repositories.JobUserRepository;
 import com.turborvip.core.domain.repositories.RateHistoryRepository;
 import com.turborvip.core.model.dto.*;
-import com.turborvip.core.model.entity.Job;
-import com.turborvip.core.model.entity.JobUser;
-import com.turborvip.core.model.entity.RateHistory;
-import com.turborvip.core.model.entity.User;
+import com.turborvip.core.model.entity.*;
 import com.turborvip.core.model.entity.compositeKey.JobUserKey;
 import com.turborvip.core.model.entity.compositeKey.RateHistoryKey;
-import com.turborvip.core.service.H3Service;
-import com.turborvip.core.service.JobService;
-import com.turborvip.core.service.NotificationService;
+import com.turborvip.core.service.*;
 import com.uber.h3core.exceptions.DistanceUndefinedException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
@@ -51,9 +46,16 @@ public class JobServiceImpl implements JobService {
     @Autowired
     private final NotificationService notificationService;
 
+    @Autowired
+    private final UserStatisticService userStatisticService;
+
+    @Autowired
+    private final UserService userService;
+
     @Override
     public void createJob(HttpServletRequest request, JobDTO jobDTO) throws Exception {
         User user = authService.getUserByHeader(request);
+        userService.checkLimitRoleBusiness(user);
 
         Job job = new Job(jobDTO.getName(), jobDTO.getAddress(), jobDTO.getImages(), jobDTO.getDescription(), jobDTO.getQuantityWorker(),
                 new Timestamp(jobDTO.getStartDate().getTime()), new Timestamp(jobDTO.getDueDate().getTime()), jobDTO.isVehicle(),
@@ -76,6 +78,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public void findNormalJob(HttpServletRequest request, long jobId) throws Exception {
         User user = authService.getUserByHeader(request);
+        userService.checkLimitRoleBusiness(user);
 
         Job job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
         if (job == null) {
@@ -87,6 +90,7 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public void findNormalJobRunTime(User user, long jobId) throws Exception {
+        userService.checkLimitRoleBusiness(user);
         Job job = jobRepository.findByCreateByAndId(user, jobId).orElse(null);
         if (job == null) {
             throw new Exception("Don't have job!");
@@ -201,8 +205,13 @@ public class JobServiceImpl implements JobService {
         }
 
         jobUser.setStatus("approve");
-
         job.setQuantityWorkerCurrent(job.getQuantityWorkerCurrent() + 1);
+
+        // Todo update userStatistic
+        if(job.getQuantityWorkerCurrent() == job.getQuantityWorkerTotal()){
+            userStatisticService.updateUserStatistic(user,job);
+        }
+
         String note = "From " + user.getFullName() + " (" + job.getName() + ") : " + description;
         notificationService.createNotificationApproveReqForWorker(job, user, jobUser.getUserId(), note, "push");
         if (job.getQuantityWorkerCurrent() == job.getQuantityWorkerTotal()) {
