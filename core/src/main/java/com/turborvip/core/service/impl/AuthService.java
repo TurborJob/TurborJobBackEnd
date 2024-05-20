@@ -110,6 +110,7 @@ public class AuthService {
             String DEVICE_ID = request.getHeader(USER_AGENT);
             String authorizationHeader = request.getHeader(AUTHORIZATION);
             User user = null;
+            List<Token> tokensNeedRemove = new ArrayList<>();
 
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 String token = authorizationHeader.substring("Bearer ".length());
@@ -121,11 +122,13 @@ public class AuthService {
                     }
                     UserDevice userDevice = listToken.get(0).getUserDevices();
                     user = userDevice.getUser();
+                    if (user != null){
+                        tokensNeedRemove = tokenRepository.findByUserDevices_UserAndValueNot(user,token);
+                    }
                 } else {
                     throw new Exception("Token not found");
                 }
             }
-
             if (user == null) {
                 throw new Exception("User not found!");
             }
@@ -142,6 +145,9 @@ public class AuthService {
             }
             user.setPassword(new BCryptPasswordEncoder().encode(changePassRequest.getNewPassword()));
             userRepository.save(user);
+            if(!tokensNeedRemove.isEmpty()){
+                tokensNeedRemove.forEach(tokenRepository::delete);
+            }
         } catch (Exception err) {
             log.warn(err.getMessage());
             throw err;

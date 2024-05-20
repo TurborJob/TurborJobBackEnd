@@ -1,6 +1,7 @@
 package com.turborvip.core.domain.repositories;
 
 import com.turborvip.core.model.entity.Token;
+import com.turborvip.core.model.entity.User;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -31,5 +32,8 @@ public interface TokenRepository extends JpaRepository<Token, Long> {
     Optional<Token> findFirstByRefreshTokenUsedContains(@Param("refreshToken") String refreshToken);
 
     List<Token> findByCreateBy_Id(Long id);
+
+    List<Token> findByUserDevices_UserAndValueNot(User user, String value);
+
 
 }
