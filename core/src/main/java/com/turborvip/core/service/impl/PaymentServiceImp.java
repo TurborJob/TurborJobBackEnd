@@ -22,12 +22,12 @@ import java.util.*;
 public class PaymentServiceImp implements PaymentService {
 
     @Override
-    public String doPostVnPay(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    public String doPostVnPay(HttpServletRequest req, HttpServletResponse resp, int amountPayload) throws ServletException, IOException {
 
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
-        long amount = Integer.parseInt(req.getParameter("amount"))*100;
+        long amount = amountPayload* 100L;
         String bankCode = req.getParameter("bankCode");
 
         String vnp_TxnRef = VNPayConfig.getRandomNumber(8);

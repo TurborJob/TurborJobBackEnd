@@ -9,6 +9,7 @@ import com.turborvip.core.model.entity.User;
 import com.turborvip.core.service.impl.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+@Slf4j
 @RestApiV1
 @RequiredArgsConstructor
 @Component("UserResourceImpl")
@@ -39,7 +41,9 @@ public class UserResourceImpl implements UserResource {
     public ResponseEntity<?> getRoleName(HttpServletRequest request) {
         try {
             //String phone = (String) requestBody.get("phone");
+            log.info("Get role name");
             return VsResponseUtil.ok("Get role success", userService.getRoleName(request));
+
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }

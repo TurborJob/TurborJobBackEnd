@@ -87,6 +87,8 @@ subprojects {
 //		compile group: 'com.google.guava', name: 'guava', version: "${guavaVersion}"
 //		compile group: 'org.apache.commons', name: 'commons-lang3', version: "${commonLang3Version}"
 
+		
+
 		// TEST
 		testImplementation('org.springframework.boot:spring-boot-starter-test') {
 			exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'

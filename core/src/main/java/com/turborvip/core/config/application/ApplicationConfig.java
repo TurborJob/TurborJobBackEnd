@@ -4,6 +4,7 @@ import com.turborvip.core.domain.repositories.UserRepository;
 import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +24,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 @EnableScheduling
 @RequiredArgsConstructor
+@Slf4j
 public class ApplicationConfig {
 
     @Autowired
@@ -114,7 +116,6 @@ public class ApplicationConfig {
 //            new GMailerServiceImpl().sendEmail("dothanhdat11032002@gmail.com",
 //                    "Warning warning !!! Turborvip app",
 //                    "Another try attach your account you should change password now!");
-
         };
     }
 

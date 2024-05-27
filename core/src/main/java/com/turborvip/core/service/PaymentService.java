@@ -7,5 +7,5 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 public interface PaymentService {
-    String doPostVnPay(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException;
+    String doPostVnPay(HttpServletRequest req, HttpServletResponse resp, int amount) throws ServletException, IOException;
 }

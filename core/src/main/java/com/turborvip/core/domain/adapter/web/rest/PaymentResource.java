@@ -16,5 +16,5 @@ import java.util.Map;
 public interface PaymentResource {
 
     @PostMapping("all/payment/vnpay")
-    ResponseEntity<RestData<?>> requestPaymentVNPay(HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<RestData<?>> requestPaymentVNPay(HttpServletRequest request, HttpServletResponse response, @RequestBody Map<String, Object> requestBody);
 }

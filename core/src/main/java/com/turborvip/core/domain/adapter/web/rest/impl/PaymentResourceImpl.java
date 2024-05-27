@@ -20,9 +20,10 @@ public class PaymentResourceImpl implements PaymentResource {
     private PaymentService paymentService;
 
     @Override
-    public ResponseEntity<RestData<?>> requestPaymentVNPay(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<RestData<?>> requestPaymentVNPay(HttpServletRequest request, HttpServletResponse response, Map<String, Object> requestBody) {
         try {
-            return VsResponseUtil.ok(paymentService.doPostVnPay(request,response));
+            int amount = (int) requestBody.get("value");
+            return VsResponseUtil.ok(paymentService.doPostVnPay(request,response, amount));
         } catch (Exception e) {
             return VsResponseUtil.error(HttpStatus.BAD_REQUEST, e.getMessage());
         }

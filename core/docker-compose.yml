@@ -16,5 +16,68 @@ services:
     volumes:
       - ./data/postgis:/var/lib/postgresql/data
 
+  elasticsearch:
+    container_name: es-container
+    restart: unless-stopped
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    environment:
+      - discovery.type=single-node
+      # - ELASTIC_USERNAME=elastic
+      # - ELASTIC_PASSWORD=123456a
+      # - xpack.security.enabled=true
+      - xpack.security.enabled=false
+      # - boostrap.memory_lock=true
+      # - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    networks:
+      - turborjob_net
+    ports:
+      - 9200:9200
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    deploy:
+      resources:
+        limits:
+          memory: 1GB
+
+  kibana:
+    container_name: kb-container
+    restart: unless-stopped
+    image: docker.elastic.co/kibana/kibana:8.13.4
+    environment:
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      # - ELASTIC_USERNAME=elastic
+      # - ELASTIC_PASSWORD=123456a
+    networks:
+      - turborjob_net
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:8.13.4
+    restart: unless-stopped
+    container_name: logstash_springboot
+    volumes:
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./src/main/resources/logs/app-log4j3.log:/usr/share/data-log/app-log4j3.log
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    networks:
+      - turborjob_net
+    depends_on:
+      - elasticsearch
 networks:
   turborjob_net:
+    driver: bridge
+
+volumes:
+  elasticsearch_data:
+    driver: local
