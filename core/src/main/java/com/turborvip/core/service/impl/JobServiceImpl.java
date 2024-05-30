@@ -137,7 +137,7 @@ public class JobServiceImpl implements JobService {
         List<JobWithDistance> listJobDistance = new ArrayList<>();
         jobs.forEach(i -> {
             double distance = h3Service.haversineDistance(lng, lat, i.getCoordinates().getX(), i.getCoordinates().getY());
-            JobWithDistance jobDistance = new JobWithDistance(i, distance);
+            JobWithDistance jobDistance = new JobWithDistance(i, distance, i.getCreateBy().getRating(), i.getCreateBy().getCountRate());
             listJobDistance.add(jobDistance);
         });
 

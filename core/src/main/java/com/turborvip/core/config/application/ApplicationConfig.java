@@ -3,6 +3,7 @@ package com.turborvip.core.config.application;
 import com.turborvip.core.domain.repositories.UserRepository;
 import com.turborvip.core.service.H3Service;
 import com.turborvip.core.service.UserService;
+import com.turborvip.core.service.UserStatisticService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class ApplicationConfig {
 
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    UserStatisticService userStatisticService;
 
 
     @Autowired
@@ -116,6 +120,8 @@ public class ApplicationConfig {
 //            new GMailerServiceImpl().sendEmail("dothanhdat11032002@gmail.com",
 //                    "Warning warning !!! Turborvip app",
 //                    "Another try attach your account you should change password now!");
+
+            userStatisticService.updateUserStatisticEndOfDay();
         };
     }
 

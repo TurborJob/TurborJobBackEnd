@@ -34,8 +34,8 @@ public class UserStatisticServiceImpl implements UserStatisticService {
             Date now = new Date();
 
             // Todo update in day
-            userStatistic.setJobSuccessInDay(userStatistic.getUserApproveInDay() + 1);
-            userStatistic.setUserApproveInDay(userStatistic.getJobSuccessInDay() + job.getQuantityWorkerTotal());
+            userStatistic.setJobSuccessInDay(userStatistic.getJobSuccessInDay() + 1);
+            userStatistic.setUserApproveInDay(userStatistic.getUserApproveInDay() + job.getQuantityWorkerTotal());
 
             // Todo update in month
             userStatistic.setJobSuccessInMonth(userStatistic.getJobSuccessInMonth() + 1);

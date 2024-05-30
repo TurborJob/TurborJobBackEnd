@@ -15,4 +15,6 @@ import lombok.Setter;
 public class JobWithDistance {
     Job job;
     double distance;
+    float rate;
+    long numReview;
 }
